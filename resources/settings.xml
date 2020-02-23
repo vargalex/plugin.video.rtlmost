@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <category>
+        <setting label="Videó minősége" type="enum" id="hls_quality" values="Automatikus|Választható" default="0" />
+		<setting label="RTL Most+ tartalom elrejtése" type="bool" id="hide_plus" default="true" />
+		<setting label="Sorrend beállítás" type="lsep" />
+		<setting label="Epizódok sorrendbe rendezésének kísérlete" type="bool" id="sort_episodes" default="false"/>
+		<setting label="Fordított sorrend" type="bool" id="sort_reverse" default="true" visible="eq(-1,true)"/>
+	</category>
+	<category label="MPEG-DASH">
+		<setting label="DRM védett tartalom lejátszása. Kodi v18 és RTL Most regisztráció szükséges." type="lsep" />
+        <setting id="dash_support" type="bool" label="" visible="false" enable="true" default="false" />
+        <setting id="use_dash" type="bool" label="MPEG-DASH használata" default="false" enable="eq(-1,true)"/>
+        <setting label="RTL Most bejelentkezés" type="lsep" />
+        <setting label="E-mail:" type="text" id="email" default="" enable="eq(-2,true)" />
+        <setting label="Jelszó:" type="text" id="password" option="hidden" default="" enable="eq(-3,true)" />
+    	<setting id="drmsettings" type="action" label="InputStream Adaptive beállítások" visible="eq(-4,true)+eq(-5,true)" option="close" action="RunPlugin(plugin://plugin.video.rtlmost/?action=drmSettings)" ></setting>
+		<setting type="text" id="userid" visible="false" default="" />
+		<setting type="text" id="signature" visible="false" default="" />
+    	<setting type="text" id="s.timestamp" visible="false" default="0" />
+		<setting type="bool" id="loggedin" visible="false" default="false" />
+	</category>
+</settings>

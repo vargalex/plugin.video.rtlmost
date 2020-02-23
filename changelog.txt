@@ -1,0 +1,32 @@
+﻿[B]2.2.7[/B]
+- Élő adás lejátszása RTL Most+ előfizetés esetén
+
+[B]2.2.6[/B]
+- RTL Most+ tartalom lejátszása érvényes előfizetés esetén
+- Epizódsorrend beállítási lehetőség
+
+[B]2.2.5[/B]
+- RTL Most+ tartalom elrejtésének javítása
+
+[B]2.2.4[/B]
+- RTL Most+ tartalom detektálásának módosítása
+
+[B]2.2.3[/B]
+- RTL Most+ tartalom jelölése / elrejtése
+
+[B]2.2.2[/B]
+- Forrás változás (univerzális megoldás)
+
+[B]2.2.1[/B]
+- Forrás változás követése
+
+[B]2.2.0[/B]
+- DRM védett tartalom lejátszása (Kodi v18)
+
+[B]2.1.0[/B]
+- Videó felbontás kiválasztásának lehetősége
+- Kodi 16 (Jarvis) support
+- Bug fixes
+
+[B]2.0.0[/B]
+- Forrás változás

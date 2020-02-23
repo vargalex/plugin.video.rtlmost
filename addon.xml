@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.rtlmost" name="RTL Most" version="2.2.7" provider-name="just-some-random-ninja">
+	<requires>
+		<import addon="xbmc.python" version="2.24.0"/>
+	</requires>
+	<extension point="xbmc.python.pluginsource" library="default.py">
+		<provides>video</provides>
+	</extension>
+	<extension point="xbmc.service" library="resources/lib/modules/startup.py" start="startup" />
+	<extension point="xbmc.addon.metadata">
+		<summary lang="en">RTL Most!</summary>
+		<description lang="en">RTL Most!, nézd meg kedvenc műsoraidat - amikor neked jó!</description>
+		<language>hu</language>
+		<platform>all</platform>
+		<news>
+			- Élő adás lejátszása RTL Most+ előfizetés esetén
+		</news>
+		<assets>
+		  <icon>icon.png</icon>
+		  <fanart>fanart.jpg</fanart>
+		  <screenshot>resources/screenshots/screenshot-1.jpg</screenshot>
+		  <screenshot>resources/screenshots/screenshot-2.jpg</screenshot>
+		  <screenshot>resources/screenshots/screenshot-3.jpg</screenshot>
+		</assets>
+	</extension>
+</addon>
