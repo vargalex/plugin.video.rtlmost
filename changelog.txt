@@ -1,4 +1,7 @@
-﻿[B]2.2.7[/B]
+﻿[B]2.2.8[/B]
+- Login javítása
+
+[B]2.2.7[/B]
 - Élő adás lejátszása RTL Most+ előfizetés esetén
 
 [B]2.2.6[/B]

@@ -179,7 +179,6 @@ class navigator:
         clip = json.loads(clip)
         assets = clip['clips'][0].get('assets')
         streams = [i['full_physical_path'] for i in assets]
-
         from resources.lib.modules import player
         player.player().play(id, streams, image, meta)
 
@@ -198,7 +197,7 @@ class navigator:
         client_js = re.search('''<script\s*type=['"]module['"]\s*src=['"](\/?client-.+?)['"]''', most_source).group(1)
         api_src = net.request(urlparse.urljoin(most_baseUrl, client_js))
         api_src = re.findall('gigya\s*:\s*(\{[^\}]+\})', api_src)
-        api_src = [i for i in api_src if 'domain:' in i][0]
+        api_src = [i for i in api_src if 'login.rtlmost.hu' in i][0]
         api_src = json.loads(re.sub('([{,:])(\w+)([},:])','\\1\"\\2\"\\3', api_src))
 
         r = net.request(login_url % (api_src['domain'], self.username, self.password, api_src['key']))

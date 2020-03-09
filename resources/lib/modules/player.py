@@ -33,6 +33,7 @@ class player:
 
 
     def play(self, id, streams, image, meta):
+        streams = sorted(streams)
         dash_url = [i for i in streams if 'drmnp.ism/Manifest.mpd' in i]
         hls_url = [i for i in streams if 'unpnp.ism/Manifest.m3u8' in i]
         live_url = [i for i in streams if 'stream.m3u8' in i]
@@ -49,8 +50,7 @@ class player:
         if dash:
             # Inputstream and DRM
             manifest_url = net.request(dash_url[0], redirect=False)
-            stream_url = os.path.dirname(manifest_url) + '/Manifest.mpd'
-            
+            stream_url = os.path.dirname(manifest_url) + '/Manifest.mpd'         
             headers = {
                 'x-auth-gigya-uid': self.uid,
                 'x-auth-gigya-signature': xbmcaddon.Addon().getSetting('signature'),
