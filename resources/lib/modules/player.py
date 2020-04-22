@@ -19,7 +19,7 @@
 '''
 
 
-import os,sys,json,xbmc,xbmcaddon,xbmcgui,xbmcplugin
+import os,sys,json,xbmc,xbmcaddon,xbmcgui,xbmcplugin,re
 from resources.lib.modules import net
 from resources.lib.modules import m3u8_parser
 
@@ -34,7 +34,8 @@ class player:
 
     def play(self, id, streams, image, meta):
         streams = sorted(streams)
-        dash_url = [i for i in streams if 'drmnp.ism/Manifest.mpd' in i]
+        #dash_url = [i for i in streams if 'drmnp.ism/Manifest.mpd' in i]
+        dash_url = [i for i in streams if re.match(r'(.*)drm(.*)Manifest.mpd(.*)', i)]
         hls_url = [i for i in streams if 'unpnp.ism/Manifest.m3u8' in i]
         live_url = [i for i in streams if 'stream.m3u8' in i]
 
