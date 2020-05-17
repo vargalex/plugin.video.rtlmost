@@ -1,4 +1,7 @@
-﻿[B]2.2.9[/B]
+﻿[B]2.2.10[/B]
+- InputStream Helper integráció
+
+[B]2.2.9[/B]
 - DRM védett tartalom detektálása regex alapján
 
 [B]2.2.8[/B]

@@ -39,15 +39,8 @@ class player:
         hls_url = [i for i in streams if 'unpnp.ism/Manifest.m3u8' in i]
         live_url = [i for i in streams if 'stream.m3u8' in i]
 
-        dash = xbmcaddon.Addon().getSetting('use_dash') == 'true'and xbmcaddon.Addon().getSetting('dash_support') == 'true' and self.login == True and dash_url != []
+        dash = xbmcaddon.Addon().getSetting('use_dash') == 'true' and self.login == True and dash_url != []
 
-        if dash and not self.check_ISA_enabled():
-            dialog = xbmcgui.Dialog()
-            if dialog.yesno('RTL Most', u'Az MPEG-DASH enged\u00E9lyezve van az RTL Most be\u00E1ll\u00EDt\u00E1saiban, de az InputStream Adaptive alkalmaz\u00E1s le van tiltva. Szeretn\u00E9d most enged\u00E9lyezni?'):
-                dash = self.set_ISA_enabled()
-            else:
-                dash = False
-        
         if dash:
             # Inputstream and DRM
             manifest_url = net.request(dash_url[0], redirect=False)
@@ -64,13 +57,19 @@ class player:
 
             license_headers = 'x-dt-auth-token=' + x_dt_auth_token + '&Origin=https://www.rtlmost.hu&Content-Type='
             license_key = 'https://lic.drmtoday.com/license-proxy-widevine/cenc/' + '|' + license_headers + '|R{SSM}|JBlicense'
-            li = xbmcgui.ListItem(path=stream_url)
-            li.setProperty('inputstreamaddon', 'inputstream.adaptive')
-            li.setProperty('inputstream.adaptive.manifest_type', 'mpd')
-            li.setProperty('inputstream.adaptive.license_type', 'com.widevine.alpha')
-            li.setProperty('inputstream.adaptive.license_key', license_key)
-            li.setMimeType('application/dash+xml')
-            li.setContentLookup(False)
+            DRM = 'com.widevine.alpha'
+            PROTOCOL = 'mpd'
+
+            from inputstreamhelper import Helper
+            is_helper = Helper(PROTOCOL, drm=DRM)
+            if is_helper.check_inputstream():
+                li = xbmcgui.ListItem(path=stream_url)
+                li.setProperty('inputstreamaddon', 'inputstream.adaptive')
+                li.setProperty('inputstream.adaptive.manifest_type', PROTOCOL)
+                li.setProperty('inputstream.adaptive.license_type', DRM)
+                li.setProperty('inputstream.adaptive.license_key', license_key)
+                li.setMimeType('application/dash+xml')
+                li.setContentLookup(False)
 
         elif hls_url != []:
             stream_url = hls_url[0]
@@ -144,39 +143,3 @@ class player:
         li.setArt({'icon': image, 'thumb': image, 'poster': image, 'tvshow.poster': image})
         li.setInfo(type='Video', infoLabels = meta)
         xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, li)
-
-
-    def check_ISA_enabled(self):
-        rpc_request = json.dumps({"jsonrpc": "2.0",
-                                  "method": "Addons.GetAddonDetails",
-                                  "id": 1,
-                                  "params": {"addonid": "%s" % 'inputstream.adaptive',
-                                             "properties": ["enabled"]}
-                                  })
-        response = json.loads(xbmc.executeJSONRPC(rpc_request))
-        try:
-            return response['result']['addon']['enabled'] is True
-        except KeyError:
-            message = response['error']['message']
-            code = response['error']['code']
-            error = 'Requested |%s| received error |%s| and code: |%s|' % (rpc_request, message, code)
-            xbmc.log(error, xbmc.LOGDEBUG)
-            return False
-
-
-    def set_ISA_enabled(self):
-        rpc_request = json.dumps({"jsonrpc": "2.0",
-                                  "method": "Addons.SetAddonEnabled",
-                                  "id": 1,
-                                  "params": {"addonid": "%s" % 'inputstream.adaptive',
-                                             "enabled": True}
-                                  })
-        response = json.loads(xbmc.executeJSONRPC(rpc_request))
-        try:
-            return response['result'] == 'OK'
-        except KeyError:
-            message = response['error']['message']
-            code = response['error']['code']
-            error = 'Requested |%s| received error |%s| and code: |%s|' % (rpc_request, message, code)
-            xbmc.log(error, xbmc.LOGDEBUG)
-            return False
