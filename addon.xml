@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.rtlmost" name="RTL Most" version="2.2.10" provider-name="just-some-random-ninja">
+<addon id="plugin.video.rtlmost" name="RTL Most" version="2.2.11" provider-name="just-some-random-ninja">
 	<requires>
-		<import addon="xbmc.python" version="2.24.0"/>
+		<import addon="xbmc.python" version="2.25.0"/>
 		<import addon="script.module.inputstreamhelper" version="0.4.3"/>
 	</requires>
 	<extension point="xbmc.python.pluginsource" library="default.py">
@@ -12,8 +12,12 @@
 		<description lang="en">RTL Most!, nézd meg kedvenc műsoraidat - amikor neked jó!</description>
 		<language>hu</language>
 		<platform>all</platform>
-		<news>- InputStream Helper integráció
-		</news>
+		<news>[B]v2.2.11[/B]
+- A kiegészítő mostantól csak bejelentkezési adatok megadása után használható
+- Kijelentkezés opció a beállításokban (csak aktív bejelentkezés esetén elérhető)
+
+[B]v2.2.10[/B]
+- InputStream Helper integráció</news>
 		<assets>
 		  <icon>icon.png</icon>
 		  <fanart>fanart.jpg</fanart>

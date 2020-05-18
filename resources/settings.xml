@@ -7,16 +7,17 @@
 		<setting label="Epizódok sorrendbe rendezésének kísérlete" type="bool" id="sort_episodes" default="false"/>
 		<setting label="Fordított sorrend" type="bool" id="sort_reverse" default="true" visible="eq(-1,true)"/>
 	</category>
-	<category label="MPEG-DASH">
-		<setting label="DRM védett tartalom lejátszása. Kodi v18 és RTL Most regisztráció szükséges." type="lsep" />
-        <setting id="use_dash" type="bool" label="MPEG-DASH használata" default="false" enable="eq(-1,true)"/>
+	<category label="Bejelentkezés">
         <setting label="RTL Most bejelentkezés" type="lsep" />
-        <setting label="E-mail:" type="text" id="email" default="" enable="eq(-2,true)" />
-        <setting label="Jelszó:" type="text" id="password" option="hidden" default="" enable="eq(-3,true)" />
-    	<setting id="drmsettings" type="action" label="InputStream Adaptive beállítások" visible="eq(-4,true)+eq(-5,true)" option="close" action="RunPlugin(plugin://plugin.video.rtlmost/?action=drmSettings)" ></setting>
+        <setting label="E-mail:" type="text" id="email" default="" />
+        <setting label="Jelszó:" type="text" id="password" option="hidden" default="" />
 		<setting type="text" id="userid" visible="false" default="" />
 		<setting type="text" id="signature" visible="false" default="" />
     	<setting type="text" id="s.timestamp" visible="false" default="0" />
 		<setting type="bool" id="loggedin" visible="false" default="false" />
+		<setting id="logout" type="action" label="[B][COLOR red]Kijelentkezés[/COLOR][/B]" option="close" action="RunPlugin(plugin://plugin.video.rtlmost/?action=logout)" visible="eq(-1,true)" ></setting>
+	</category>
+	<category label="InputStream">
+	    <setting id="drmsettings" type="action" label="InputStream Adaptive beállítások" option="close" action="RunPlugin(plugin://plugin.video.rtlmost/?action=drmSettings)" ></setting>
 	</category>
 </settings>

@@ -1,4 +1,8 @@
-﻿[B]2.2.10[/B]
+﻿[B]2.2.11[/B]
+- A kiegészítő mostantól csak bejelentkezési adatok megadása után használható
+- Kijelentkezés opció a beállításokban (csak aktív bejelentkezés esetén elérhető)
+
+[B]2.2.10[/B]
 - InputStream Helper integráció
 
 [B]2.2.9[/B]
