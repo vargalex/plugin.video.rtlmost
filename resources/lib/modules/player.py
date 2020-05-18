@@ -29,7 +29,6 @@ getjwt_url = 'aHR0cHM6Ly9hdXRoLjZwbGF5LmZyL3YyL3BsYXRmb3Jtcy9tNmdyb3VwX3dlYi9nZX
 class player:
     def __init__(self):
         self.uid = xbmcaddon.Addon().getSetting('userid')
-        self.login = xbmcaddon.Addon().getSetting('loggedin') == 'true'
 
 
     def play(self, id, streams, image, meta):
@@ -39,9 +38,7 @@ class player:
         hls_url = [i for i in streams if 'unpnp.ism/Manifest.m3u8' in i]
         live_url = [i for i in streams if 'stream.m3u8' in i]
 
-        dash = xbmcaddon.Addon().getSetting('use_dash') == 'true' and self.login == True and dash_url != []
-
-        if dash:
+        if dash_url != []:
             # Inputstream and DRM
             manifest_url = net.request(dash_url[0], redirect=False)
             stream_url = os.path.dirname(manifest_url) + '/Manifest.mpd'         

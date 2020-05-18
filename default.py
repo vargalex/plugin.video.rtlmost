@@ -20,6 +20,8 @@
 
 
 import urlparse,sys, xbmcgui
+from resources.lib.indexers.navigator import navigator
+
 
 params = dict(urlparse.parse_qsl(sys.argv[2].replace('?','')))
 
@@ -36,29 +38,26 @@ image = params.get('image')
 meta = params.get('meta')
 
 if action == None:
-    from resources.lib.indexers import navigator
-    navigator.navigator().root()
+    navigator().root()
 
 elif action == 'programs':
-    from resources.lib.indexers import navigator
-    navigator.navigator().programs(url)
+    navigator().programs(url)
 
 elif action == 'episodes':
-    from resources.lib.indexers import navigator
-    navigator.navigator().episodes(url, fanart, subcats)
+    navigator().episodes(url, fanart, subcats)
 
 elif action == 'play':
-    from resources.lib.indexers import navigator
-    navigator.navigator().get_video(url, meta, image)
+    navigator().get_video(url, meta, image)
 
 elif action == 'liveChannels':
-    from resources.lib.indexers import navigator
-    navigator.navigator().liveChannels()
+    navigator().liveChannels()
 
 elif action == 'liveChannel':
-    from resources.lib.indexers import navigator
-    navigator.navigator().liveChannel(url)
+    navigator().liveChannel(url)
 
 elif action == 'drmSettings':
     import xbmcaddon
     xbmcaddon.Addon(id='inputstream.adaptive').openSettings()
+    
+elif action == 'logout':
+    navigator().Logout()

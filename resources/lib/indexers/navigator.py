@@ -25,7 +25,8 @@ from  collections import OrderedDict
 
 
 sysaddon = sys.argv[0] ; syshandle = int(sys.argv[1])
-addonFanart = xbmcaddon.Addon().getAddonInfo('fanart')
+addon = xbmcaddon.Addon
+addonFanart = addon().getAddonInfo('fanart')
 
 base_url = 'aHR0cHM6Ly9wYy5taWRkbGV3YXJlLjZwbGF5LmZyLzZwbGF5L3YyL3BsYXRmb3Jtcy9tNmdyb3VwX3dlYi9zZXJ2aWNlcy9ydGxodV9ydGxfbW9zdA=='.decode('base64')
 img_link = 'aHR0cHM6Ly9pbWFnZXMuNnBsYXkuZnIvdjIvaW1hZ2VzLyVzL3Jhdw=='.decode('base64')
@@ -36,12 +37,20 @@ episode_subcat_link = 'L3Byb2dyYW1zLyVzP3dpdGg9bGlua3Msc3ViY2F0cyxyaWdodHM='
 video_link = 'L3ZpZGVvcy8lcz9jc2E9NSZ3aXRoPWNsaXBzLGZyZWVtaXVtcGFja3MscHJvZ3JhbV9pbWFnZXMsc2VydmljZV9kaXNwbGF5X2ltYWdlcw=='
 livechannels_link = 'L2xpdmU/Y2hhbm5lbD1ydGxodV9ydGxfa2x1YixydGxodV9ydGxfaWkscnRsaHVfcnRsX2dvbGQscnRsaHVfY29vbCxydGxodV9ydGxfcGx1cyxydGxodV9maWxtX3BsdXMscnRsaHVfc29yb3phdF9wbHVzLHJ0bGh1X211enNpa2FfdHYmd2l0aD1mcmVlbWl1bXBhY2tzLHNlcnZpY2VfZGlzcGxheV9pbWFnZXMsbmV4dGRpZmZ1c2lvbixleHRyYV9kYXRhCg=='
 live_stream_link = 'L2xpdmU/Y2hhbm5lbD0lcyZ3aXRoPWZyZWVtaXVtcGFja3Msc2VydmljZV9kaXNwbGF5X2ltYWdlcyxuZXh0ZGlmZnVzaW9uLGV4dHJhX2RhdGEK'
+
+
 class navigator:
     def __init__(self):
-        self.username = xbmcaddon.Addon().getSetting('email')
-        self.password = xbmcaddon.Addon().getSetting('password')
-        if (self.username and self.password) != '':
-            self.Login()
+        self.username = xbmcaddon.Addon().getSetting('email').strip()
+        self.password = xbmcaddon.Addon().getSetting('password').strip()
+
+        if not (self.username and self.password) != '':
+            if xbmcgui.Dialog().ok('RTL Most', u'A kieg\u00E9sz\u00EDt\u0151 haszn\u00E1lat\u00E1hoz add meg a bejelentkez\u00E9si adataidat.'):
+                xbmc.executebuiltin('Dialog.Close(busydialognocancel)')
+                addon(addon().getAddonInfo('id')).openSettings()                
+            sys.exit(0)
+
+        self.Login()
 
 
     def root(self):
@@ -208,12 +217,28 @@ class navigator:
             xbmcgui.Dialog().ok(u'Bejelentkez\u00E9si hiba', jsonparse['errorMessage'])
             xbmcaddon.Addon().setSetting('loggedin', 'false')
             xbmcaddon.Addon().setSetting('s.timestamp', '0')
-            return
+            sys.exit(0)
 
         xbmcaddon.Addon().setSetting('userid', jsonparse['UID'])
         xbmcaddon.Addon().setSetting('signature', jsonparse['UIDSignature'])
         xbmcaddon.Addon().setSetting('s.timestamp', jsonparse['signatureTimestamp'])
         xbmcaddon.Addon().setSetting('loggedin', 'true')
+
+
+    def Logout(self):
+        dialog = xbmcgui.Dialog()
+        if 1 == dialog.yesno(u'RTL Most kijelentkez\u00E9s', u'Val\u00F3ban ki szeretn\u00E9l jelentkezni?', '', ''):
+            xbmcaddon.Addon().setSetting('userid', '')
+            xbmcaddon.Addon().setSetting('signature', '')
+            xbmcaddon.Addon().setSetting('s.timestamp', '0')
+            xbmcaddon.Addon().setSetting('loggedin', 'false')
+            xbmcaddon.Addon().setSetting('email', '')
+            xbmcaddon.Addon().setSetting('password', '')
+            xbmc.executebuiltin("XBMC.Container.Update(path,replace)")
+            xbmc.executebuiltin("XBMC.ActivateWindow(Home)")
+            dialog.ok('RTL Most', u'Sikeresen kijelentkezt\u00E9l.\nAz adataid t\u00F6r\u00F6lve lettek a kieg\u00E9sz\u00EDt\u0151b\u0151l.')
+        
+        return
 
 
     def addDirectoryItem(self, name, query, thumb, icon, context=None, queue=False, isAction=True, isFolder=True, Fanart=None, meta=None):
