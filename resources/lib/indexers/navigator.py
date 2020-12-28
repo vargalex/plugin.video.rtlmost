@@ -37,6 +37,8 @@ episode_subcat_link = 'L3Byb2dyYW1zLyVzP3dpdGg9bGlua3Msc3ViY2F0cyxyaWdodHM='
 video_link = 'L3ZpZGVvcy8lcz9jc2E9NSZ3aXRoPWNsaXBzLGZyZWVtaXVtcGFja3MscHJvZ3JhbV9pbWFnZXMsc2VydmljZV9kaXNwbGF5X2ltYWdlcw=='
 livechannels_link = 'L2xpdmU/Y2hhbm5lbD1ydGxodV9ydGxfa2x1YixydGxodV9ydGxfaWkscnRsaHVfcnRsX2dvbGQscnRsaHVfY29vbCxydGxodV9ydGxfcGx1cyxydGxodV9maWxtX3BsdXMscnRsaHVfc29yb3phdF9wbHVzLHJ0bGh1X211enNpa2FfdHYmd2l0aD1mcmVlbWl1bXBhY2tzLHNlcnZpY2VfZGlzcGxheV9pbWFnZXMsbmV4dGRpZmZ1c2lvbixleHRyYV9kYXRhCg=='
 live_stream_link = 'L2xpdmU/Y2hhbm5lbD0lcyZ3aXRoPWZyZWVtaXVtcGFja3Msc2VydmljZV9kaXNwbGF5X2ltYWdlcyxuZXh0ZGlmZnVzaW9uLGV4dHJhX2RhdGEK'
+freemiumsubsriptions_url = 'aHR0cHM6Ly82cGxheS11c2Vycy42cGxheS5mci92Mi9wbGF0Zm9ybXMvbTZncm91cF93ZWIvdXNlcnMvJXMvZnJlZW1pdW1zdWJzY3JpcHRpb25z'
+freemium_subscription_needed_errormsg = 'QSBob3p6w6Fmw6lyw6lzaGV6IFJUTCBNb3N0KyBlbMWRZml6ZXTDqXMgc3rDvGtzw6lnZXMuClLDqXN6bGV0ZWs6IGh0dHBzOi8vd3d3LnJ0bG1vc3QuaHUvcHJlbWl1bQ=='
 
 
 class navigator:
@@ -89,7 +91,7 @@ class navigator:
             from resources.lib.modules import player
             player.player().play(channel, streams, None, json.dumps(meta))
         else:
-            xbmcgui.Dialog().ok(u'Lej\u00E1tsz\u00E1s sikertelen.', u'A hozz\u00E1f\u00E9r\u00E9shez RTL Most+ el\u0151fizet\u00E9s sz\u00FCks\u00E9ges.')
+            xbmcgui.Dialog().ok(u'Lej\u00E1tsz\u00E1s sikertelen.', freemium_subscription_needed_errormsg.decode('base64').decode('utf-8'))
             xbmcplugin.setResolvedUrl(int(sys.argv[1]), False, xbmcgui.ListItem())
 
     def programs(self, id):
@@ -109,6 +111,8 @@ class navigator:
         self.endDirectory(type='tvshows')
 
     def episodes(self, id, fanart, subcats=None):
+        try: myfreemiumcodes = json.loads(xbmcaddon.Addon().getSetting('myfreemiumcodes'))
+        except: myfreemiumcodes = {}
 
         def getClipID(item):
             return int(item['clips'][0]['id'])
@@ -126,20 +130,34 @@ class navigator:
         def episodeIsMostPlus(episode):
             return (('freemium_products' in item) and (len(item['freemium_products']) > 0))
 
+        def userIsEligibleToPlayEpisode(episode):
+            if not episodeIsMostPlus(episode):
+                return True
+            for product in item['freemium_products']:
+                code = product["code"]
+                id = product["id"]
+                if code in myfreemiumcodes and id in myfreemiumcodes[code]:
+                    return True
+            return False
+
         try: subcats = json.loads(subcats)
         except: pass
         if subcats == None:
             query = base_url + episode_subcat_link.decode('base64')
             subcats = net.request(query % id)
-            subcats = [str(i['id']) for i in json.loads(subcats)['program_subcats'] if 'id' in i]
+            subcats = [i for i in json.loads(subcats)['program_subcats'] if 'id' in i]
+
+        if len(subcats) > 1:
+            # the show has multiple seasons or subcategories, list these, and let the user to choose one
+            for item in subcats:
+                str(item['id'])
+                self.addDirectoryItem(item['title'].encode('utf-8'), 'episodes&url=%s&fanart=%s&subcats=%s' % (id, fanart, json.dumps([item])), '', 'DefaultFolder.png', Fanart=fanart)
+            self.endDirectory(type='seasons')
+            return
 
         query = base_url + episode_link.decode('base64')
-        episodes = net.request(query % (id, subcats[0]))
+        episodes = net.request(query % (id, str(subcats[0]['id'])))
         episodes = json.loads(episodes)
-        
-        try: del subcats[0]
-        except: subcats = []
-        if len(subcats) == 0: subcats = '0'
 
         hidePlus = xbmcaddon.Addon().getSetting('hide_plus') == 'true'
 
@@ -152,12 +170,15 @@ class navigator:
                 sortedEpisodes = sorted(episodes, key=getEpisode, reverse=reverseSorting)
             else:
                 sortedEpisodes = sorted(episodes, key=getClipID, reverse=reverseSorting)
+
+        hasItemsListed = False
         for item in sortedEpisodes:
             try:
-                if ((not hidePlus) or (not episodeIsMostPlus(item))):
+                eligible = userIsEligibleToPlayEpisode(item)
+                if (not hidePlus) or eligible:
                     title = item['title'].encode('utf-8')
-                    if (episodeIsMostPlus(item)):
-                        title = '[COLOR red]' + title + '[/COLOR]'
+                    if not eligible:
+                        title = '[COLOR red]' + title + ' [B](Most+)[/B][/COLOR]'
                     plot = item['description'].encode('utf-8')
                     duration = str(item['duration'])
                     try: thumb = img_link % [i['external_key'] for i in item['images'] if i['role'] == 'vignette'][0]
@@ -167,29 +188,58 @@ class navigator:
                     clip_id = item['id'].encode('utf-8')
                     meta = {'title': title, 'plot': plot, 'duration': duration}
                     self.addDirectoryItem(title, 'play&url=%s&meta=%s&image=%s' % (urllib.quote_plus(clip_id), urllib.quote_plus(json.dumps(meta)), thumb), thumb, 'DefaultTVShows.png', meta=meta, isFolder=False, Fanart=fanart)
+                    hasItemsListed = True
             except:
                 pass
-        
-        if subcats and subcats != '0':
-            self.addDirectoryItem(u'[I]K\u00F6vetkez\u0151 oldal  >>[/I]', 'episodes&url=%s&fanart=%s&subcats=%s' % (id, fanart, json.dumps(subcats)), '', 'DefaultFolder.png', Fanart=fanart)
 
         self.endDirectory(type='episodes')
 
+        if hidePlus and not hasItemsListed and len(sortedEpisodes) > 0:
+            xbmcgui.Dialog().ok('RTL Most', freemium_subscription_needed_errormsg.decode('base64').decode('utf-8'))
+            xbmc.executebuiltin("XBMC.Action(Back)")
+
 
     def get_video(self, id, meta, image):
-        headers = {
+        query = base_url + video_link.decode('base64')
+        clip = net.request(query % id, headers=self.addAuthenticationHeaders())
+        clip = json.loads(clip)
+        assets = clip['clips'][0].get('assets')
+        if assets is not None and assets != []:
+            streams = [i['full_physical_path'] for i in assets]
+            from resources.lib.modules import player
+            player.player().play(id, streams, image, meta)
+        else:
+            xbmcgui.Dialog().ok(u'Lej\u00E1tsz\u00E1s sikertelen.', freemium_subscription_needed_errormsg.decode('base64').decode('utf-8'))
+            xbmcplugin.setResolvedUrl(int(sys.argv[1]), False, xbmcgui.ListItem())
+
+
+    def myFreemiumCodes(self):
+        my_uid = xbmcaddon.Addon().getSetting('userid')
+        rsp = net.request(freemiumsubsriptions_url.decode('base64') % my_uid, headers=self.addAuthenticationHeaders())
+
+        my_freemium_product_codes = dict()
+        for subscription in json.loads(rsp):
+            for product in subscription.get("freemium_products", []):
+                code = product["code"]
+                id = product["id"]
+                if code not in my_freemium_product_codes:
+                    # list: if the account has multiple subscriptions, they might provide
+                    # the same code under different ids (not very likely, but let's prepare)
+                    my_freemium_product_codes[code] = list()
+                my_freemium_product_codes[code].append(id)
+
+        return my_freemium_product_codes
+
+
+    def addAuthenticationHeaders(self, headers = dict()):
+        headers.update({
             'x-6play-freemium': '1',
             'x-auth-gigya-uid': xbmcaddon.Addon().getSetting('userid'),
             'x-auth-gigya-signature': xbmcaddon.Addon().getSetting('signature'),
             'x-auth-gigya-signature-timestamp': xbmcaddon.Addon().getSetting('s.timestamp'),
-            'Origin': 'https://www.rtlmost.hu'}
-        query = base_url + video_link.decode('base64')
-        clip = net.request(query % id, headers=headers)
-        clip = json.loads(clip)
-        assets = clip['clips'][0].get('assets')
-        streams = [i['full_physical_path'] for i in assets]
-        from resources.lib.modules import player
-        player.player().play(id, streams, image, meta)
+            'Origin': 'https://www.rtlmost.hu'
+        })
+        return headers
 
 
     def Login(self):
@@ -223,6 +273,7 @@ class navigator:
         xbmcaddon.Addon().setSetting('signature', jsonparse['UIDSignature'])
         xbmcaddon.Addon().setSetting('s.timestamp', jsonparse['signatureTimestamp'])
         xbmcaddon.Addon().setSetting('loggedin', 'true')
+        xbmcaddon.Addon().setSetting('myfreemiumcodes', json.dumps(self.myFreemiumCodes()))
 
 
     def Logout(self):
@@ -232,6 +283,7 @@ class navigator:
             xbmcaddon.Addon().setSetting('signature', '')
             xbmcaddon.Addon().setSetting('s.timestamp', '0')
             xbmcaddon.Addon().setSetting('loggedin', 'false')
+            xbmcaddon.Addon().setSetting('myfreemiumcodes', '')
             xbmcaddon.Addon().setSetting('email', '')
             xbmcaddon.Addon().setSetting('password', '')
             xbmc.executebuiltin("XBMC.Container.Update(path,replace)")
