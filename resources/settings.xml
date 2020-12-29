@@ -3,6 +3,7 @@
     <category>
         <setting label="Videó minősége" type="enum" id="hls_quality" values="Automatikus|Választható" default="0" />
 		<setting label="Előfizetetlen RTL Most+ tartalmak elrejtése" type="bool" id="hide_plus" default="true" />
+		<setting label="Műsor címénél az elérhető tartalom megjelenítése" type="bool" id="show_content_summary" default="true" />
 		<setting label="Sorrend beállítás" type="lsep" />
 		<setting label="Epizódok sorrendbe rendezésének kísérlete" type="bool" id="sort_episodes" default="false"/>
 		<setting label="Fordított sorrend" type="bool" id="sort_reverse" default="true" visible="eq(-1,true)"/>
