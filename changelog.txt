@@ -1,4 +1,7 @@
-﻿[B]2.2.12[/B]
+﻿[B]2.2.13[/B]
+- Műsoron belül elérhető tartalom megjelenítése
+
+[B]2.2.12[/B]
 - Prémium tartalmak megkülönböztetése csak akkor, ha nincs hozzá érvényes előfizetés
 - Ha egy műsor több évadból áll, évadok listázása almappaként, lapozás helyett
 - Hiányzó előfizetéshez kötött tartalom lejátszásának megtagadása, dialógusablakkal

@@ -106,7 +106,14 @@ class navigator:
             except: fanart = None
             id = str(i['id'])
             plot = i['description'].encode('utf-8')
-            self.addDirectoryItem(title, 'episodes&url=%s&fanart=%s' % (id, fanart), thumb, 'DefaultTVShows.png', Fanart=fanart, meta={'plot': plot})
+            extraInfo = ""
+            try:
+                if (i['count']['vi']>0):
+                    extraInfo = " (%d %s)" % (i['count']['vi'], i['program_type_wording']['plural'].encode('utf-8') if i['program_type_wording'] != None else 'Teljes adás')
+                else:
+                    extraInfo = " (%d előzetes és részletek)" % (i['count']['vc'])
+            except: pass
+            self.addDirectoryItem("%s[I][COLOR silver]%s[/COLOR][/I]" % (title, extraInfo), 'episodes&url=%s&fanart=%s' % (id, fanart), thumb, 'DefaultTVShows.png', Fanart=fanart, meta={'plot': plot})
 
         self.endDirectory(type='tvshows')
 
