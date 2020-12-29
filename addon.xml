@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.rtlmost" name="RTL Most" version="2.2.11" provider-name="just-some-random-ninja">
+<addon id="plugin.video.rtlmost" name="RTL Most" version="2.2.12" provider-name="just-some-random-ninja">
 	<requires>
 		<import addon="xbmc.python" version="2.25.0"/>
 		<import addon="script.module.inputstreamhelper" version="0.4.3"/>
@@ -12,12 +12,16 @@
 		<description lang="en">RTL Most!, nézd meg kedvenc műsoraidat - amikor neked jó!</description>
 		<language>hu</language>
 		<platform>all</platform>
-		<news>[B]v2.2.11[/B]
-- A kiegészítő mostantól csak bejelentkezési adatok megadása után használható
-- Kijelentkezés opció a beállításokban (csak aktív bejelentkezés esetén elérhető)
+		<news>[B]v2.2.12[/B]
+- Prémium tartalmak megkülönböztetése csak akkor, ha nincs hozzá érvényes előfizetés
+- Ha egy műsor több évadból áll, évadok listázása almappaként, lapozás helyett
+- Hiányzó előfizetéshez kötött tartalom lejátszásának megtagadása, dialógusablakkal
+- Figyelmeztetés, ha előfizetés hiányában a mappában minden tartalom elrejtésre került
+- Apróbb hibajavítások a kivételkezelés területén, informatívabb hibaüzenetek
 
-[B]v2.2.10[/B]
-- InputStream Helper integráció</news>
+[B]v2.2.11[/B]
+- A kiegészítő mostantól csak bejelentkezési adatok megadása után használható
+- Kijelentkezés opció a beállításokban (csak aktív bejelentkezés esetén elérhető)</news>
 		<assets>
 		  <icon>icon.png</icon>
 		  <fanart>fanart.jpg</fanart>

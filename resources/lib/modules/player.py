@@ -37,6 +37,7 @@ class player:
         dash_url = [i for i in streams if re.match(r'(.*)drm(.*)Manifest.mpd(.*)', i)]
         hls_url = [i for i in streams if 'unpnp.ism/Manifest.m3u8' in i]
         live_url = [i for i in streams if 'stream.m3u8' in i]
+        li = None
 
         if dash_url != []:
             # Inputstream and DRM
@@ -130,8 +131,8 @@ class player:
             xbmc.Player().play(stream_url, li)
             return
 
-        else:
-            xbmcgui.Dialog().notification(u'Lej\u00E1tsz\u00E1s sikertelen. DRM v\u00E9dett m\u0171sor.', 'RTL Most', time=4000)
+        if li is None:
+            xbmcgui.Dialog().notification(u'Lej\u00E1tsz\u00E1s sikertelen. DRM v\u00E9dett m\u0171sor.', 'RTL Most', time=8000)
             xbmcplugin.setResolvedUrl(int(sys.argv[1]), False, xbmcgui.ListItem())
             return
 

@@ -1,4 +1,11 @@
-﻿[B]2.2.11[/B]
+﻿[B]2.2.12[/B]
+- Prémium tartalmak megkülönböztetése csak akkor, ha nincs hozzá érvényes előfizetés
+- Ha egy műsor több évadból áll, évadok listázása almappaként, lapozás helyett
+- Hiányzó előfizetéshez kötött tartalom lejátszásának megtagadása, dialógusablakkal
+- Figyelmeztetés, ha előfizetés hiányában a mappában minden tartalom elrejtésre került
+- Apróbb hibajavítások a kivételkezelés területén, informatívabb hibaüzenetek
+
+[B]2.2.11[/B]
 - A kiegészítő mostantól csak bejelentkezési adatok megadása után használható
 - Kijelentkezés opció a beállításokban (csak aktív bejelentkezés esetén elérhető)
 
