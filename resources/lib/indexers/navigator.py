@@ -122,6 +122,37 @@ class navigator:
         try: myfreemiumcodes = json.loads(xbmcaddon.Addon().getSetting('myfreemiumcodes'))
         except: myfreemiumcodes = {}
 
+        class title_sorter:
+            PATTERNS_IN_PRIORITY_ORDER = [
+                re.compile(ur'^(?P<YEAR>\d{2,4})-(?P<MONTH>\d{2})-(?P<DAY>\d{2})$'),          # Date-only
+                re.compile(ur'^(?P<SEASON>\d+)\. évad (?P<EPISODE>\d+)\. rész$'),             # Only Season + Episode
+                re.compile(ur'^(?P<EPISODE>\d+)\. rész$'),                                    # Only Episode
+                re.compile(ur'.* (?P<YEAR>\d{2,4})-(?P<MONTH>\d{2})-(?P<DAY>\d{2})$'),        # Title + Date
+                re.compile(ur'.* \((?P<YEAR>\d{2,4})-(?P<MONTH>\d{2})-(?P<DAY>\d{2})\)$'),    # Title + (Date)
+                re.compile(ur'^(?P<YEAR>\d{2,4})-(?P<MONTH>\d{2})-(?P<DAY>\d{2}) .*'),        # Date + Title
+                re.compile(ur'.* (?P<SEASON>\d+)\. évad (?P<EPISODE>\d+)\. rész$'),           # Title + Season + Episode
+                re.compile(ur'.* (?P<EPISODE>\d+)\. rész$')                                   # Title + Episode
+            ]
+
+            @classmethod
+            def find_first_common_pattern(cls, episodes):
+                for pattern in cls.PATTERNS_IN_PRIORITY_ORDER:
+                    if all([ pattern.match(ep.get('title', '')) is not None for ep in episodes ]):
+                        return pattern
+                return None
+
+            @classmethod
+            def all_match_same_pattern(cls, episodes):
+                return cls.find_first_common_pattern(episodes) is not None
+
+            @classmethod
+            def sorted(cls, episodes, reverse):
+                def key(episode):
+                    m = pattern.match(episode.get('title', ''))
+                    return tuple(int(i) for i in m.groups())
+                pattern = cls.find_first_common_pattern(episodes)
+                return sorted(episodes, key=lambda ep: key(ep), reverse=reverse)
+
         def getClipID(item):
             return int(item['clips'][0]['id'])
         
@@ -176,6 +207,8 @@ class navigator:
                 reverseSorting = True
             if (allEpisodeFilled(episodes)):
                 sortedEpisodes = sorted(episodes, key=getEpisode, reverse=reverseSorting)
+            elif title_sorter.all_match_same_pattern(episodes):
+                sortedEpisodes = title_sorter.sorted(episodes, reverse=reverseSorting)
             else:
                 sortedEpisodes = sorted(episodes, key=getClipID, reverse=reverseSorting)
 

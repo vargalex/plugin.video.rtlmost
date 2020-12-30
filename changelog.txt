@@ -1,4 +1,7 @@
-﻿[B]2.2.14[/B]
+﻿[B]2.2.15[/B]
+- Okosabb sorbarendező algoritmus, ha a mappában minden adás címe azonos mintára illeszkedik
+
+[B]2.2.14[/B]
 - Mostantól a műsoron belül elérhető tartalom megjelenítése kikapcsolható a beállításokban
 
 [B]2.2.13[/B]
