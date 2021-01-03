@@ -98,16 +98,19 @@ class player:
             li = xbmcgui.ListItem(path=stream_url)
 
         elif live_url != []:
+            live_url.sort(reverse=True)
             sources = []
             for i in live_url:
                 stream_url = i
                 try:
-                    manifest = net.request(stream_url)
+                    manifest = net.request(stream_url, timeout=30)
                     sources_temp = m3u8_parser.parse(manifest)
                     root = os.path.dirname(stream_url)
                     for j in sources_temp:
                         j['root'] = root
                     sources.extend(sources_temp)
+                    if len(sources)>0:
+                        break
                 except:
                         pass
             sources = sorted(sources, key=lambda x: x['resolution'], reverse=False)

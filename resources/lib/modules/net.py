@@ -22,7 +22,7 @@
 import sys,urllib,urllib2,random,cookielib
 
 
-def request(url, post=None, headers={}, redirect=True):
+def request(url, post=None, headers={}, redirect=True, timeout=30):
     handlers = []
     if (2, 7, 8) < sys.version_info < (2, 7, 12):
         try:
@@ -64,7 +64,7 @@ def request(url, post=None, headers={}, redirect=True):
         except: pass
 
     request = urllib2.Request(url, data=post, headers=headers)
-    response = urllib2.urlopen(request, timeout=30)
+    response = urllib2.urlopen(request, timeout=timeout)
 
     if redirect == False:
         result = response.headers.get('location')

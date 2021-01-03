@@ -1,4 +1,7 @@
-﻿[B]2.2.15[/B]
+﻿[B]2.1.16[/B]
+- Live stream első találat esetén nem keres több forrást (cdn.y5.hu szerver nem elérhető)
+
+[B]2.2.15[/B]
 - Okosabb sorbarendező algoritmus, ha a mappában minden adás címe azonos mintára illeszkedik
 
 [B]2.2.14[/B]
