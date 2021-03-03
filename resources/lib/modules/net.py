@@ -19,8 +19,13 @@
 '''
 
 
-import sys,urllib,urllib2,random,cookielib
-
+import sys,urllib,random
+if sys.version_info[0] == 3:
+    import urllib.request as urllib2
+    import http.cookiejar as cookielib
+else:
+    import urllib2
+    import cookielib
 
 def request(url, post=None, headers={}, redirect=True, timeout=30):
     handlers = []
@@ -72,4 +77,4 @@ def request(url, post=None, headers={}, redirect=True, timeout=30):
     else: 
         result = response.read(5242880)
     response.close()
-    return result
+    return result.decode('utf-8')

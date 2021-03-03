@@ -1,4 +1,7 @@
-﻿[B]2.1.17[/B]
+﻿[B]2.1.18[/B]
+- Matrix kompatibilitás
+
+[B]2.1.17[/B]
 - Forrás változás követése
 
 [B]2.1.16[/B]

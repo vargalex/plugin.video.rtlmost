@@ -7,6 +7,8 @@ try:
 except:
     from pysqlite2 import dbapi2 as database
 
+from resources.lib.modules.utils import py2_encode
+
 addonInfo = xbmcaddon.Addon().getAddonInfo
 dataPath = xbmc.translatePath(addonInfo('profile')).decode('utf-8')
 cacheFile = os.path.join(dataPath, 'cache.db')
@@ -36,7 +38,7 @@ def get(function, timeout, *args, **table):
         dbcur.execute("SELECT * FROM %s WHERE func = '%s' AND args = '%s'" % (table, f, a))
         match = dbcur.fetchone()
 
-        response = eval(match[2].encode('utf-8'))
+        response = eval(py2_encode(match[2]))
 
         t1 = int(match[3])
         t2 = int(time.time())
@@ -66,7 +68,7 @@ def get(function, timeout, *args, **table):
         pass
 
     try:
-        return eval(r.encode('utf-8'))
+        return eval(py2_encode(r))
     except:
         pass
 

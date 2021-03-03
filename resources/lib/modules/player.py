@@ -22,9 +22,10 @@
 import os,sys,json,xbmc,xbmcaddon,xbmcgui,xbmcplugin,re
 from resources.lib.modules import net
 from resources.lib.modules import m3u8_parser
+from resources.lib.modules.utils import py2_encode
 
-token_url = 'aHR0cHM6Ly82cGxheS11c2Vycy42cGxheS5mci92Mi9wbGF0Zm9ybXMvbTZncm91cF93ZWIvc2VydmljZXMvcnRsaHVfcnRsX21vc3QvdXNlcnMvJXMvdmlkZW9zLyVzL3VwZnJvbnQtdG9rZW4='
-getjwt_url = 'aHR0cHM6Ly9hdXRoLjZwbGF5LmZyL3YyL3BsYXRmb3Jtcy9tNmdyb3VwX3dlYi9nZXRKd3QK'
+token_url = 'https://6play-users.6play.fr/v2/platforms/m6group_web/services/rtlhu_rtl_most/users/%s/videos/%s/upfront-token'
+getjwt_url = 'https://auth.6play.fr/v2/platforms/m6group_web/getJwt'
 
 class player:
     def __init__(self):
@@ -50,9 +51,9 @@ class player:
                 'x-auth-gigya-signature-timestamp': xbmcaddon.Addon().getSetting('s.timestamp'),
                 'Origin': 'https://www.rtlmost.hu'}
 
-            token_source = net.request(token_url.decode('base64') % (self.uid, id), headers=headers)
+            token_source = net.request(token_url % (self.uid, id), headers=headers)
             token_source = json.loads(token_source)
-            x_dt_auth_token = token_source['token'].encode('utf-8')
+            x_dt_auth_token = py2_encode(token_source['token'])
 
             license_headers = 'x-dt-auth-token=' + x_dt_auth_token + '&Origin=https://www.rtlmost.hu&Content-Type='
             license_key = 'https://lic.drmtoday.com/license-proxy-widevine/cenc/' + '|' + license_headers + '|R{SSM}|JBlicense'
@@ -63,6 +64,10 @@ class player:
             is_helper = Helper(PROTOCOL, drm=DRM)
             if is_helper.check_inputstream():
                 li = xbmcgui.ListItem(path=stream_url)
+                if sys.version_info < (3, 0):  # if python version < 3 is safe to assume we are running on Kodi 18
+                    li.setProperty('inputstreamaddon', 'inputstream.adaptive')   # compatible with Kodi 18 API
+                else:
+                    li.setProperty('inputstream', 'inputstream.adaptive')  # compatible with recent builds Kodi 19 API
                 li.setProperty('inputstreamaddon', 'inputstream.adaptive')
                 li.setProperty('inputstream.adaptive.manifest_type', PROTOCOL)
                 li.setProperty('inputstream.adaptive.license_type', DRM)

@@ -19,11 +19,15 @@
 '''
 
 
-import urlparse,sys, xbmcgui
+import sys, xbmcgui
+if sys.version_info[0] == 3:
+    from urllib.parse import parse_qsl
+else:
+    from urlparse import parse_qsl
 from resources.lib.indexers.navigator import navigator
 
 
-params = dict(urlparse.parse_qsl(sys.argv[2].replace('?','')))
+params = dict(parse_qsl(sys.argv[2].replace('?','')))
 
 action = params.get('action')
 

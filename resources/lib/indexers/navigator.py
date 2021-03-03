@@ -19,26 +19,34 @@
 '''
 
 
-import os,sys,re,xbmc,xbmcgui,xbmcplugin,xbmcaddon,urllib,urlparse,json,time
+import os,sys,re,xbmc,xbmcgui,xbmcplugin,xbmcaddon,urllib,json,time
 from resources.lib.modules import net
 from  collections import OrderedDict
+if sys.version_info[0] == 3:
+    import urllib.parse as urlparse
+    from urllib.parse import quote_plus
+else:
+    import urlparse
+    from urllib import quote_plus
+
+from resources.lib.modules.utils import py2_encode
 
 
 sysaddon = sys.argv[0] ; syshandle = int(sys.argv[1])
 addon = xbmcaddon.Addon
 addonFanart = addon().getAddonInfo('fanart')
 
-base_url = 'aHR0cHM6Ly9wYy5taWRkbGV3YXJlLjZwbGF5LmZyLzZwbGF5L3YyL3BsYXRmb3Jtcy9tNmdyb3VwX3dlYi9zZXJ2aWNlcy9ydGxodV9ydGxfbW9zdA=='.decode('base64')
-img_link = 'aHR0cHM6Ly9pbWFnZXMuNnBsYXkuZnIvdjIvaW1hZ2VzLyVzL3Jhdw=='.decode('base64')
-cat_link = 'L2ZvbGRlcnM/bGltaXQ9MTAwJm9mZnNldD0w'
-prog_link = 'L2ZvbGRlcnMvJXMvcHJvZ3JhbXM/bGltaXQ9MTAwJm9mZnNldD0wJmNzYT01JndpdGg9cGFyZW50Y29udGV4dA=='
-episode_link = 'L3Byb2dyYW1zLyVzL3ZpZGVvcz9jc2E9NSZ3aXRoPWNsaXBzLGZyZWVtaXVtcGFja3MmdHlwZT12aSx2YyxwbGF5bGlzdCZsaW1pdD01MCZvZmZzZXQ9MCZzdWJjYXQ9JXMmc29ydD1zdWJjYXQ='
-episode_subcat_link = 'L3Byb2dyYW1zLyVzP3dpdGg9bGlua3Msc3ViY2F0cyxyaWdodHM='
-video_link = 'L3ZpZGVvcy8lcz9jc2E9NSZ3aXRoPWNsaXBzLGZyZWVtaXVtcGFja3MscHJvZ3JhbV9pbWFnZXMsc2VydmljZV9kaXNwbGF5X2ltYWdlcw=='
-livechannels_link = 'L2xpdmU/Y2hhbm5lbD1ydGxodV9ydGxfa2x1YixydGxodV9ydGxfaWkscnRsaHVfcnRsX2dvbGQscnRsaHVfY29vbCxydGxodV9ydGxfcGx1cyxydGxodV9maWxtX3BsdXMscnRsaHVfc29yb3phdF9wbHVzLHJ0bGh1X211enNpa2FfdHYmd2l0aD1mcmVlbWl1bXBhY2tzLHNlcnZpY2VfZGlzcGxheV9pbWFnZXMsbmV4dGRpZmZ1c2lvbixleHRyYV9kYXRhCg=='
-live_stream_link = 'L2xpdmU/Y2hhbm5lbD0lcyZ3aXRoPWZyZWVtaXVtcGFja3Msc2VydmljZV9kaXNwbGF5X2ltYWdlcyxuZXh0ZGlmZnVzaW9uLGV4dHJhX2RhdGEK'
-freemiumsubsriptions_url = 'aHR0cHM6Ly82cGxheS11c2Vycy42cGxheS5mci92Mi9wbGF0Zm9ybXMvbTZncm91cF93ZWIvdXNlcnMvJXMvZnJlZW1pdW1zdWJzY3JpcHRpb25z'
-freemium_subscription_needed_errormsg = 'QSBob3p6w6Fmw6lyw6lzaGV6IFJUTCBNb3N0KyBlbMWRZml6ZXTDqXMgc3rDvGtzw6lnZXMuClLDqXN6bGV0ZWs6IGh0dHBzOi8vd3d3LnJ0bG1vc3QuaHUvcHJlbWl1bQ=='
+base_url = 'https://pc.middleware.6play.fr/6play/v2/platforms/m6group_web/services/rtlhu_rtl_most'
+img_link = 'https://images.6play.fr/v2/images/%s/raw'
+cat_link = '/folders?limit=100&offset=0'
+prog_link = '/folders/%s/programs?limit=100&offset=0&csa=5&with=parentcontext'
+episode_link = '/programs/%s/videos?csa=5&with=clips,freemiumpacks&type=vi,vc,playlist&limit=50&offset=0&subcat=%s&sort=subcat'
+episode_subcat_link = '/programs/%s?with=links,subcats,rights'
+video_link = '/videos/%s?csa=5&with=clips,freemiumpacks,program_images,service_display_images'
+livechannels_link = '/live?channel=rtlhu_rtl_klub,rtlhu_rtl_ii,rtlhu_rtl_gold,rtlhu_cool,rtlhu_rtl_plus,rtlhu_film_plus,rtlhu_sorozat_plus,rtlhu_muzsika_tv&with=freemiumpacks,service_display_images,nextdiffusion,extra_data'
+live_stream_link = '/live?channel=%s&with=freemiumpacks,service_display_images,nextdiffusion,extra_data'
+freemiumsubscriptions_url = 'https://6play-users.6play.fr/v2/platforms/m6group_web/users/%s/freemiumsubscriptions'
+freemium_subscription_needed_errormsg = 'A hozzáféréshez RTL Most+ előfizetés szükséges.\nRészletek: https://www.rtlmost.hu/premium'
 
 
 class navigator:
@@ -56,22 +64,22 @@ class navigator:
 
 
     def root(self):
-        query = base_url + cat_link.decode('base64')
+        query = base_url + cat_link
         categories = net.request(query)
 
         self.addDirectoryItem('Élő adás', 'liveChannels', '', 'DefaultTVShows.png')
         for i in json.loads(categories):
-            self.addDirectoryItem(i['name'].encode('utf-8'), 'programs&url=%s' % str(i['id']), '', 'DefaultTVShows.png')
+            self.addDirectoryItem(py2_encode(i['name']), 'programs&url=%s' % str(i['id']), '', 'DefaultTVShows.png')
 
         self.endDirectory()
 
 
     def liveChannels(self):
         liveChannels = {'rtlhu_rtl_klub': 'RTL Klub', 'rtlhu_rtl_ii': 'RTL II', 'rtlhu_cool': 'Cool TV', 'rtlhu_rtl_gold': 'RTL Gold', 'rtlhu_rtl_plus': 'RTL+', 'rtlhu_film_plus': 'Film+', 'rtlhu_sorozat_plus': 'Sorozat+', 'rtlhu_muzsika_tv': 'Muzsika TV'}
-        query = base_url + livechannels_link.decode('base64')
+        query = base_url + livechannels_link
         lives = net.request(query)
         for (i,j) in json.loads(lives, object_pairs_hook=OrderedDict).items():
-            self.addDirectoryItem("[B]"+liveChannels[i.encode('utf-8')] + "[/B] - " + j[0]['title'].encode('utf-8') + "  [COLOR gold][" + j[0]['diffusion_start_date'].encode('utf-8')[11:-3] + " - " + j[0]['diffusion_end_date'].encode('utf-8')[11:-3] + "][/COLOR]", 'liveChannel&url=%s' % i.encode('utf-8'), '', 'DefaultTVShows.png')
+            self.addDirectoryItem("[B]"+liveChannels[i] + "[/B] - " + py2_encode(j[0]['title']) + "  [COLOR gold][" + j[0]['diffusion_start_date'][11:-3] + " - " + j[0]['diffusion_end_date'][11:-3] + "][/COLOR]", 'liveChannel&url=%s' % i, '', 'DefaultTVShows.png')
         self.endDirectory()
 
     def liveChannel(self, channel):
@@ -81,7 +89,7 @@ class navigator:
             'x-auth-gigya-signature': xbmcaddon.Addon().getSetting('signature'),
             'x-auth-gigya-signature-timestamp': xbmcaddon.Addon().getSetting('s.timestamp'),
             'Origin': 'https://www.rtlmost.hu'}
-        query = base_url + live_stream_link.decode('base64')
+        query = base_url + live_stream_link
         live = net.request(query % channel, headers=headers)
         live = json.loads(live)
         assets = live[channel][0]['live']['assets']
@@ -91,26 +99,26 @@ class navigator:
             from resources.lib.modules import player
             player.player().play(channel, streams, None, json.dumps(meta))
         else:
-            xbmcgui.Dialog().ok(u'Lej\u00E1tsz\u00E1s sikertelen.', freemium_subscription_needed_errormsg.decode('base64').decode('utf-8'))
+            xbmcgui.Dialog().ok(u'Lej\u00E1tsz\u00E1s sikertelen.', freemium_subscription_needed_errormsg)
             xbmcplugin.setResolvedUrl(int(sys.argv[1]), False, xbmcgui.ListItem())
 
     def programs(self, id):
-        query = base_url + prog_link.decode('base64')
+        query = base_url + prog_link
         programs = net.request(query % id)
 
         for i in json.loads(programs):
-            title = i['title'].encode('utf-8')
+            title = py2_encode(i['title'])
             try: thumb = img_link % [x['external_key'] for x in i['images'] if x['role'] == 'logo'][0]
             except: thumb = ''
             try: fanart = img_link % [x['external_key'] for x in i['images'] if x['role'] == 'mea'][0]
             except: fanart = None
             id = str(i['id'])
-            plot = i['description'].encode('utf-8')
+            plot = py2_encode(i['description'])
             extraInfo = ""
             if xbmcaddon.Addon().getSetting('show_content_summary') == 'true':
                 try:
                     if (i['count']['vi']>0):
-                        extraInfo = " (%d %s)" % (i['count']['vi'], i['program_type_wording']['plural'].encode('utf-8') if i['program_type_wording'] != None else 'Teljes adás')
+                        extraInfo = " (%d %s)" % (i['count']['vi'], py2_encode(i['program_type_wording']['plural']) if i['program_type_wording'] != None else 'Teljes adás')
                     else:
                         extraInfo = " (%d előzetes és részletek)" % (i['count']['vc'])
                 except: pass
@@ -124,14 +132,14 @@ class navigator:
 
         class title_sorter:
             PATTERNS_IN_PRIORITY_ORDER = [
-                re.compile(ur'^(?P<YEAR>\d{2,4})-(?P<MONTH>\d{2})-(?P<DAY>\d{2})$'),          # Date-only
-                re.compile(ur'^(?P<SEASON>\d+)\. évad (?P<EPISODE>\d+)\. rész$'),             # Only Season + Episode
-                re.compile(ur'^(?P<EPISODE>\d+)\. rész$'),                                    # Only Episode
-                re.compile(ur'.* (?P<YEAR>\d{2,4})-(?P<MONTH>\d{2})-(?P<DAY>\d{2})$'),        # Title + Date
-                re.compile(ur'.* \((?P<YEAR>\d{2,4})-(?P<MONTH>\d{2})-(?P<DAY>\d{2})\)$'),    # Title + (Date)
-                re.compile(ur'^(?P<YEAR>\d{2,4})-(?P<MONTH>\d{2})-(?P<DAY>\d{2}) .*'),        # Date + Title
-                re.compile(ur'.* (?P<SEASON>\d+)\. évad (?P<EPISODE>\d+)\. rész$'),           # Title + Season + Episode
-                re.compile(ur'.* (?P<EPISODE>\d+)\. rész$')                                   # Title + Episode
+                re.compile(r'^(?P<YEAR>\d{2,4})-(?P<MONTH>\d{2})-(?P<DAY>\d{2})$'),          # Date-only
+                re.compile(r'^(?P<SEASON>\d+)\. évad (?P<EPISODE>\d+)\. rész$'),             # Only Season + Episode
+                re.compile(r'^(?P<EPISODE>\d+)\. rész$'),                                    # Only Episode
+                re.compile(r'.* (?P<YEAR>\d{2,4})-(?P<MONTH>\d{2})-(?P<DAY>\d{2})$'),        # Title + Date
+                re.compile(r'.* \((?P<YEAR>\d{2,4})-(?P<MONTH>\d{2})-(?P<DAY>\d{2})\)$'),    # Title + (Date)
+                re.compile(r'^(?P<YEAR>\d{2,4})-(?P<MONTH>\d{2})-(?P<DAY>\d{2}) .*'),        # Date + Title
+                re.compile(r'.* (?P<SEASON>\d+)\. évad (?P<EPISODE>\d+)\. rész$'),           # Title + Season + Episode
+                re.compile(r'.* (?P<EPISODE>\d+)\. rész$')                                   # Title + Episode
             ]
 
             @classmethod
@@ -182,7 +190,7 @@ class navigator:
         try: subcats = json.loads(subcats)
         except: pass
         if subcats == None:
-            query = base_url + episode_subcat_link.decode('base64')
+            query = base_url + episode_subcat_link
             subcats = net.request(query % id)
             subcats = [i for i in json.loads(subcats)['program_subcats'] if 'id' in i]
 
@@ -190,11 +198,11 @@ class navigator:
             # the show has multiple seasons or subcategories, list these, and let the user to choose one
             for item in subcats:
                 str(item['id'])
-                self.addDirectoryItem(item['title'].encode('utf-8'), 'episodes&url=%s&fanart=%s&subcats=%s' % (id, fanart, json.dumps([item])), '', 'DefaultFolder.png', Fanart=fanart)
+                self.addDirectoryItem(py2_encode(item['title']), 'episodes&url=%s&fanart=%s&subcats=%s' % (id, fanart, json.dumps([item])), '', 'DefaultFolder.png', Fanart=fanart)
             self.endDirectory(type='seasons')
             return
 
-        query = base_url + episode_link.decode('base64')
+        query = base_url + episode_link
         episodes = net.request(query % (id, str(subcats[0]['id'])))
         episodes = json.loads(episodes)
 
@@ -217,18 +225,18 @@ class navigator:
             try:
                 eligible = userIsEligibleToPlayEpisode(item)
                 if (not hidePlus) or eligible:
-                    title = item['title'].encode('utf-8')
+                    title = py2_encode(item['title'])
                     if not eligible:
                         title = '[COLOR red]' + title + ' [B](Most+)[/B][/COLOR]'
-                    plot = item['description'].encode('utf-8')
+                    plot = py2_encode(item['description'])
                     duration = str(item['duration'])
                     try: thumb = img_link % [i['external_key'] for i in item['images'] if i['role'] == 'vignette'][0]
                     except: thumb = img_link % item['display_image']['external_key']
-                    thumb = thumb.encode('utf-8')
+                    thumb = thumb
                     assets = item['clips'][0].get('assets')
-                    clip_id = item['id'].encode('utf-8')
+                    clip_id = py2_encode(item['id'])
                     meta = {'title': title, 'plot': plot, 'duration': duration}
-                    self.addDirectoryItem(title, 'play&url=%s&meta=%s&image=%s' % (urllib.quote_plus(clip_id), urllib.quote_plus(json.dumps(meta)), thumb), thumb, 'DefaultTVShows.png', meta=meta, isFolder=False, Fanart=fanart)
+                    self.addDirectoryItem(title, 'play&url=%s&meta=%s&image=%s' % (quote_plus(clip_id), quote_plus(json.dumps(meta)), thumb), thumb, 'DefaultTVShows.png', meta=meta, isFolder=False, Fanart=fanart)
                     hasItemsListed = True
             except:
                 pass
@@ -236,12 +244,12 @@ class navigator:
         self.endDirectory(type='episodes')
 
         if hidePlus and not hasItemsListed and len(sortedEpisodes) > 0:
-            xbmcgui.Dialog().ok('RTL Most', freemium_subscription_needed_errormsg.decode('base64').decode('utf-8'))
+            xbmcgui.Dialog().ok('RTL Most', freemium_subscription_needed_errormsg)
             xbmc.executebuiltin("XBMC.Action(Back)")
 
 
     def get_video(self, id, meta, image):
-        query = base_url + video_link.decode('base64')
+        query = base_url + video_link
         clip = net.request(query % id, headers=self.addAuthenticationHeaders())
         clip = json.loads(clip)
         assets = clip['clips'][0].get('assets')
@@ -250,13 +258,13 @@ class navigator:
             from resources.lib.modules import player
             player.player().play(id, streams, image, meta)
         else:
-            xbmcgui.Dialog().ok(u'Lej\u00E1tsz\u00E1s sikertelen.', freemium_subscription_needed_errormsg.decode('base64').decode('utf-8'))
+            xbmcgui.Dialog().ok(u'Lej\u00E1tsz\u00E1s sikertelen.', freemium_subscription_needed_errormsg)
             xbmcplugin.setResolvedUrl(int(sys.argv[1]), False, xbmcgui.ListItem())
 
 
     def myFreemiumCodes(self):
         my_uid = xbmcaddon.Addon().getSetting('userid')
-        rsp = net.request(freemiumsubsriptions_url.decode('base64') % my_uid, headers=self.addAuthenticationHeaders())
+        rsp = net.request(freemiumsubscriptions_url % my_uid, headers=self.addAuthenticationHeaders())
 
         my_freemium_product_codes = dict()
         for subscription in json.loads(rsp):
@@ -339,7 +347,7 @@ class navigator:
         if thumb == '': thumb = icon
         cm = []
         if queue == True: cm.append((queueMenu, 'RunPlugin(%s?action=queueItem)' % sysaddon))
-        if not context == None: cm.append((context[0].encode('utf-8'), 'RunPlugin(%s?action=%s)' % (sysaddon, context[1])))
+        if not context == None: cm.append((py2_encode(context[0]), 'RunPlugin(%s?action=%s)' % (sysaddon, context[1])))
         item = xbmcgui.ListItem(label=name)
         item.addContextMenuItems(cm)
         item.setArt({'icon': thumb, 'thumb': thumb, 'poster': thumb})
