@@ -53,7 +53,8 @@ class navigator:
     def __init__(self):
         self.username = xbmcaddon.Addon().getSetting('email').strip()
         self.password = xbmcaddon.Addon().getSetting('password').strip()
-
+        self.password = urllib.parse.quote(self.password)
+        
         if not (self.username and self.password) != '':
             if xbmcgui.Dialog().ok('RTL Most', u'A kieg\u00E9sz\u00EDt\u0151 haszn\u00E1lat\u00E1hoz add meg a bejelentkez\u00E9si adataidat.'):
                 xbmc.executebuiltin('Dialog.Close(busydialognocancel)')
