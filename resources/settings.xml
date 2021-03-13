@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
-    <category>
+    <category label="Általános">
         <setting label="Videó minősége" type="enum" id="hls_quality" values="Automatikus|Választható" default="0" />
 		<setting label="Előfizetetlen RTL Most+ tartalmak elrejtése" type="bool" id="hide_plus" default="true" />
 		<setting label="Műsor címénél az elérhető tartalom megjelenítése" type="bool" id="show_content_summary" default="true" />
