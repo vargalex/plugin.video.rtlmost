@@ -308,7 +308,7 @@ class navigator:
         api_src = [i for i in api_src if 'login.rtlmost.hu' in i][0]
         api_src = json.loads(re.sub('([{,:])(\w+)([},:])','\\1\"\\2\"\\3', api_src))
 
-        r = net.request(login_url % (api_src['domain'], self.username, self.password, api_src['key']))
+        r = net.request(login_url % (api_src['domain'], self.username, quote_plus(self.password), api_src['key']))
         r = re.search('\(([^\)]+)', r).group(1)
         jsonparse = json.loads(r)
 

@@ -1,4 +1,7 @@
-﻿[B]2.1.18[/B]
+﻿[B]2.1.19[/B]
+- Speciális karakter kezelése a jelszóban
+
+[B]2.1.18[/B]
 - Matrix kompatibilitás
 
 [B]2.1.17[/B]
