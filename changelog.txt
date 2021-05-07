@@ -1,4 +1,7 @@
-﻿[B]2.2.21[/B]
+﻿[B]2.2.22[/B]
+- mpd átirányítás manuális kezelése
+
+[B]2.2.21[/B]
 - DRM források sorbarendezésének megszüntetése (előfordul hd-sd, de 540p-720p is)
 
 [B]2.2.20[/B]

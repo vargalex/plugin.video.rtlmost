@@ -23,6 +23,10 @@ import os,sys,json,xbmc,xbmcaddon,xbmcgui,xbmcplugin,re
 from resources.lib.modules import net
 from resources.lib.modules import m3u8_parser
 from resources.lib.modules.utils import py2_encode
+if sys.version_info[0] == 3:
+    from urllib.parse import urlparse
+else:
+    from urlparse import urlparse
 
 token_url = 'https://drm.6cloud.fr/v1/customers/rtlhu/platforms/m6group_web/services/rtlhu_rtl_most/users/%s/videos/%s/upfront-token'
 getJwt_url = 'https://front-auth.6cloud.fr/v2/platforms/m6group_web/getJwt'
@@ -43,6 +47,13 @@ class player:
             #manifest_url = net.request(dash_url[0], redirect=False)
             #stream_url = os.path.dirname(manifest_url) + '/Manifest.mpd'         
             stream_url=dash_url[0]
+
+            stream_url = net.request(stream_url, redirect=False)
+
+            parsed = urlparse(stream_url)
+
+            if len(parsed.scheme) == 0 or len(parsed.netloc) == 0:
+                stream_url = dash_url[0]
 
             headers = {
                 'x-auth-gigya-uid': self.uid,
