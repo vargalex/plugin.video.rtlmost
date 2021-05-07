@@ -34,7 +34,7 @@ class player:
 
     def play(self, id, streams, image, meta):
         #dash_url = [i for i in streams if 'drmnp.ism/Manifest.mpd' in i]
-        dash_url = sorted([i['path'] for i in streams if i['container'] == 'mpd'])
+        dash_url = [i['path'] for i in streams if i['container'] == 'mpd']
         hls_url = sorted([i['path'] for i in streams if i['container'] == 'm3u8'])
         live_url = sorted([i['path'] for i in streams if i['container'] == 'live'])
         li = None

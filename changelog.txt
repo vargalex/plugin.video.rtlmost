@@ -1,4 +1,7 @@
-﻿[B]2.2.20[/B]
+﻿[B]2.2.21[/B]
+- DRM források sorbarendezésének megszüntetése (előfordul hd-sd, de 540p-720p is)
+
+[B]2.2.20[/B]
 - DRM lejátszás frissítése az oldalváltozás szerint
 
 [B]2.1.19[/B]
