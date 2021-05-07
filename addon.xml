@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.rtlmost" name="RTL Most" version="2.2.19" provider-name="just-some-random-ninja">
+<addon id="plugin.video.rtlmost" name="RTL Most" version="2.2.20" provider-name="just-some-random-ninja">
 	<requires>
 		<import addon="script.module.inputstreamhelper" version="0.4.3"/>
 	</requires>
@@ -11,7 +11,10 @@
 		<description lang="en">RTL Most!, nézd meg kedvenc műsoraidat - amikor neked jó!</description>
 		<language>hu</language>
 		<platform>all</platform>
-		<news>[B]2.1.19[/B]
+		<news>[B]2.2.20[/B]
+- DRM lejátszás frissítése az oldalváltozás szerint
+
+[B]2.1.19[/B]
 - Speciális karakter kezelése a jelszóban
 
 [B]2.1.18[/B]

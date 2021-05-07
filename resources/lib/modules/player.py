@@ -24,8 +24,8 @@ from resources.lib.modules import net
 from resources.lib.modules import m3u8_parser
 from resources.lib.modules.utils import py2_encode
 
-token_url = 'https://6play-users.6play.fr/v2/platforms/m6group_web/services/rtlhu_rtl_most/users/%s/videos/%s/upfront-token'
-getjwt_url = 'https://auth.6play.fr/v2/platforms/m6group_web/getJwt'
+token_url = 'https://drm.6cloud.fr/v1/customers/rtlhu/platforms/m6group_web/services/rtlhu_rtl_most/users/%s/videos/%s/upfront-token'
+getJwt_url = 'https://front-auth.6cloud.fr/v2/platforms/m6group_web/getJwt'
 
 class player:
     def __init__(self):
@@ -33,22 +33,29 @@ class player:
 
 
     def play(self, id, streams, image, meta):
-        streams = sorted(streams)
         #dash_url = [i for i in streams if 'drmnp.ism/Manifest.mpd' in i]
-        dash_url = [i for i in streams if re.match(r'(.*)drm(.*)Manifest.mpd(.*)', i)]
-        hls_url = [i for i in streams if 'unpnp.ism/Manifest.m3u8' in i]
-        live_url = [i for i in streams if 'stream.m3u8' in i]
+        dash_url = sorted([i['path'] for i in streams if i['container'] == 'mpd'])
+        hls_url = sorted([i['path'] for i in streams if i['container'] == 'm3u8'])
+        live_url = sorted([i['path'] for i in streams if i['container'] == 'live'])
         li = None
-
         if dash_url != []:
             # Inputstream and DRM
             #manifest_url = net.request(dash_url[0], redirect=False)
             #stream_url = os.path.dirname(manifest_url) + '/Manifest.mpd'         
             stream_url=dash_url[0]
+
             headers = {
                 'x-auth-gigya-uid': self.uid,
                 'x-auth-gigya-signature': xbmcaddon.Addon().getSetting('signature'),
                 'x-auth-gigya-signature-timestamp': xbmcaddon.Addon().getSetting('s.timestamp'),
+                'X-Customer-Name': 'rtlhu',
+                'x-auth-device-id': xbmcaddon.Addon().getSetting('deviceid')
+            }
+            jwtAnswer = json.loads(net.request(getJwt_url, headers=headers))
+
+            headers = {
+                'x-customer-name': 'rtlhu',
+                'authorization': 'Bearer %s' % jwtAnswer['token'],
                 'Origin': 'https://www.rtlmost.hu'}
 
             token_source = net.request(token_url % (self.uid, id), headers=headers)
@@ -74,7 +81,6 @@ class player:
                 li.setProperty('inputstream.adaptive.license_key', license_key)
                 li.setMimeType('application/dash+xml')
                 li.setContentLookup(False)
-
         elif hls_url != []:
             stream_url = hls_url[0]
             manifest_url = net.request(stream_url, redirect=False)
@@ -145,7 +151,6 @@ class player:
             xbmcplugin.setResolvedUrl(int(sys.argv[1]), False, xbmcgui.ListItem())
             return
 
-        stream_url_content = net.request(stream_url)
         meta = json.loads(meta)
         li.setArt({'icon': image, 'thumb': image, 'poster': image, 'tvshow.poster': image})
         li.setInfo(type='Video', infoLabels = meta)

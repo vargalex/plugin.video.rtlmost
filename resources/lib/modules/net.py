@@ -19,13 +19,17 @@
 '''
 
 
-import sys,urllib,random
+import sys,random
 if sys.version_info[0] == 3:
     import urllib.request as urllib2
     import http.cookiejar as cookielib
+    from urllib.parse import urlencode
+    from urllib.request import addinfourl
 else:
     import urllib2
     import cookielib
+    from urllib import urlencode
+    from urllib import addinfourl
 
 def request(url, post=None, headers={}, redirect=True, timeout=30):
     handlers = []
@@ -47,14 +51,14 @@ def request(url, post=None, headers={}, redirect=True, timeout=30):
         'Accept-Language': 'hu-HU,hu;q=0.8,en-US;q=0.5,en;q=0.3'})
 
     if isinstance(post, dict):
-        post = urllib.urlencode(post)
+        post = urlencode(post)
     
     if redirect == False:
 
         class NoRedirectHandler(urllib2.HTTPRedirectHandler):
             def http_error_302(self, req, fp, code, msg, headers):
-                infourl = urllib.addinfourl(fp, headers, req.get_full_url())
-                infourl.status = code
+                infourl = addinfourl(fp, headers, req.get_full_url())
+                #infourl.status = code
                 infourl.code = code
                 return infourl
             http_error_300 = http_error_302
@@ -77,4 +81,7 @@ def request(url, post=None, headers={}, redirect=True, timeout=30):
     else: 
         result = response.read(5242880)
     response.close()
-    return result.decode('utf-8')
+    if (sys.version_info[0] == 3 and not isinstance(result, str)):
+        return result.decode('utf-8')
+    else:
+        return result

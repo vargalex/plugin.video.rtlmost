@@ -16,6 +16,7 @@
 		<setting type="text" id="signature" visible="false" default="" />
     	<setting type="text" id="s.timestamp" visible="false" default="0" />
 		<setting type="text" id="myfreemiumcodes" visible="false" default="" />
+		<setting type="text" id="deviceid" visible="false" default="" />
 		<setting type="bool" id="loggedin" visible="false" default="false" />
 		<setting id="logout" type="action" label="[B][COLOR red]Kijelentkezés[/COLOR][/B]" option="close" action="RunPlugin(plugin://plugin.video.rtlmost/?action=logout)" visible="eq(-1,true)" ></setting>
 	</category>

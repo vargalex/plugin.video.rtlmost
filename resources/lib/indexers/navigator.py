@@ -47,7 +47,7 @@ livechannels_link = '/live?channel=rtlhu_rtl_klub,rtlhu_rtl_ii,rtlhu_rtl_gold,rt
 live_stream_link = '/live?channel=%s&with=freemiumpacks,service_display_images,nextdiffusion,extra_data'
 freemiumsubscriptions_url = 'https://6play-users.6play.fr/v2/platforms/m6group_web/users/%s/freemiumsubscriptions'
 freemium_subscription_needed_errormsg = 'A hozzáféréshez RTL Most+ előfizetés szükséges.\nRészletek: https://www.rtlmost.hu/premium'
-
+deviceID_url = 'https://e.m6web.fr/info?customer=rtlhu'
 
 class navigator:
     def __init__(self):
@@ -59,7 +59,10 @@ class navigator:
                 xbmc.executebuiltin('Dialog.Close(busydialognocancel)')
                 addon(addon().getAddonInfo('id')).openSettings()                
             sys.exit(0)
-
+        if xbmcaddon.Addon().getSetting('deviceid') == "":
+            r = net.request(deviceID_url)
+            jsonparse = json.loads(r)
+            xbmcaddon.Addon().setSetting('deviceid', jsonparse['device_id'])
         self.Login()
 
 
@@ -94,7 +97,7 @@ class navigator:
         live = json.loads(live)
         assets = live[channel][0]['live']['assets']
         if assets != []:
-            streams = [i['full_physical_path'] for i in assets]
+            streams = [{'container': 'live', 'path': i['full_physical_path']} for i in assets]
             meta = {'title': live[channel][0]['title']}
             from resources.lib.modules import player
             player.player().play(channel, streams, None, json.dumps(meta))
@@ -254,7 +257,7 @@ class navigator:
         clip = json.loads(clip)
         assets = clip['clips'][0].get('assets')
         if assets is not None and assets != []:
-            streams = [i['full_physical_path'] for i in assets]
+            streams = [{'container': i['video_container'], 'path': i['full_physical_path']} for i in assets]
             from resources.lib.modules import player
             player.player().play(id, streams, image, meta)
         else:
@@ -324,6 +327,10 @@ class navigator:
         xbmcaddon.Addon().setSetting('loggedin', 'true')
         xbmcaddon.Addon().setSetting('myfreemiumcodes', json.dumps(self.myFreemiumCodes()))
 
+        r = net.request(deviceID_url)
+        jsonparse = json.loads(r)
+        xbmcaddon.Addon().setSetting('deviceid', jsonparse['device_id'])
+
 
     def Logout(self):
         dialog = xbmcgui.Dialog()
@@ -335,6 +342,7 @@ class navigator:
             xbmcaddon.Addon().setSetting('myfreemiumcodes', '')
             xbmcaddon.Addon().setSetting('email', '')
             xbmcaddon.Addon().setSetting('password', '')
+            xbmcaddon.Addon().setSetting('deviceid', '')
             xbmc.executebuiltin("XBMC.Container.Update(path,replace)")
             xbmc.executebuiltin("XBMC.ActivateWindow(Home)")
             dialog.ok('RTL Most', u'Sikeresen kijelentkezt\u00E9l.\nAz adataid t\u00F6r\u00F6lve lettek a kieg\u00E9sz\u00EDt\u0151b\u0151l.')

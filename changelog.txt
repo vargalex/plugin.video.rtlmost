@@ -1,4 +1,7 @@
-﻿[B]2.1.19[/B]
+﻿[B]2.2.20[/B]
+- DRM lejátszás frissítése az oldalváltozás szerint
+
+[B]2.1.19[/B]
 - Speciális karakter kezelése a jelszóban
 
 [B]2.1.18[/B]
