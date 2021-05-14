@@ -19,7 +19,7 @@
 '''
 
 
-import os,sys,re,xbmc,xbmcgui,xbmcplugin,xbmcaddon,urllib,json,time
+import os,sys,re,xbmc,xbmcgui,xbmcplugin,xbmcaddon,urllib,json,time,locale
 from resources.lib.modules import net
 from  collections import OrderedDict
 if sys.version_info[0] == 3:
@@ -51,6 +51,10 @@ deviceID_url = 'https://e.m6web.fr/info?customer=rtlhu'
 
 class navigator:
     def __init__(self):
+        try:
+            locale.setlocale(locale.LC_ALL, "")
+        except:
+            pass
         self.username = xbmcaddon.Addon().getSetting('email').strip()
         self.password = xbmcaddon.Addon().getSetting('password').strip()
 
@@ -108,8 +112,9 @@ class navigator:
     def programs(self, id):
         query = base_url + prog_link
         programs = net.request(query % id)
-
+        prgs={}
         for i in json.loads(programs):
+            prg = {}
             title = py2_encode(i['title'])
             try: thumb = img_link % [x['external_key'] for x in i['images'] if x['role'] == 'logo'][0]
             except: thumb = ''
@@ -125,7 +130,14 @@ class navigator:
                     else:
                         extraInfo = " (%d előzetes és részletek)" % (i['count']['vc'])
                 except: pass
-            self.addDirectoryItem("%s[I][COLOR silver]%s[/COLOR][/I]" % (title, extraInfo), 'episodes&url=%s&fanart=%s' % (id, fanart), thumb, 'DefaultTVShows.png', Fanart=fanart, meta={'plot': plot})
+            prg = {'extraInfo': extraInfo, 'id': id, 'fanart': fanart, 'thumb': thumb, 'plot': plot}
+            prgs[title] = prg
+        prgTitles = list(prgs.keys())
+        if (xbmcaddon.Addon().getSetting('sort_programs') == 'true'):
+            prgTitles.sort(key=locale.strxfrm)
+        for prg in prgTitles:
+            #self.addDirectoryItem("%s[I][COLOR silver]%s[/COLOR][/I]" % (title, extraInfo), 'episodes&url=%s&fanart=%s' % (id, fanart), thumb, 'DefaultTVShows.png', Fanart=fanart, meta={'plot': plot})
+            self.addDirectoryItem("%s[I][COLOR silver]%s[/COLOR][/I]" % (prg, prgs[prg]['extraInfo']), 'episodes&url=%s&fanart=%s' % (prgs[prg]['id'], prgs[prg]['fanart']), prgs[prg]['thumb'], 'DefaultTVShows.png', Fanart=prgs[prg]['fanart'], meta={'plot': prgs[prg]['plot']})
 
         self.endDirectory(type='tvshows')
 

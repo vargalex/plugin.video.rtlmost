@@ -1,4 +1,8 @@
-﻿[B]2.2.22[/B]
+﻿[B]2.2.23[/B]
+- műsor sorrendbe rendezés lehetősége
+- jwt token lejáratának vizsgálata
+
+[B]2.2.22[/B]
 - mpd átirányítás manuális kezelése
 
 [B]2.2.21[/B]

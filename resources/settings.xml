@@ -2,25 +2,27 @@
 <settings>
     <category label="Általános">
         <setting label="Videó minősége" type="enum" id="hls_quality" values="Automatikus|Választható" default="0" />
-		<setting label="Előfizetetlen RTL Most+ tartalmak elrejtése" type="bool" id="hide_plus" default="true" />
-		<setting label="Műsor címénél az elérhető tartalom megjelenítése" type="bool" id="show_content_summary" default="true" />
-		<setting label="Sorrend beállítás" type="lsep" />
-		<setting label="Epizódok sorrendbe rendezésének kísérlete" type="bool" id="sort_episodes" default="false"/>
-		<setting label="Fordított sorrend" type="bool" id="sort_reverse" default="true" visible="eq(-1,true)"/>
-	</category>
-	<category label="Bejelentkezés">
+        <setting label="Előfizetetlen RTL Most+ tartalmak elrejtése" type="bool" id="hide_plus" default="true" />
+        <setting label="Műsor címénél az elérhető tartalom megjelenítése" type="bool" id="show_content_summary" default="true" />
+        <setting label="Sorrend beállítás" type="lsep" />
+        <setting label="Epizódok sorrendbe rendezésének kísérlete" type="bool" id="sort_episodes" default="false" />
+        <setting label="Fordított sorrend" type="bool" id="sort_reverse" default="true" visible="eq(-1,true)" />
+        <setting label="Műsorok sorrendbe rendezése" type="bool" id="sort_programs" default="false" />
+    </category>
+    <category label="Bejelentkezés">
         <setting label="RTL Most bejelentkezés" type="lsep" />
         <setting label="E-mail:" type="text" id="email" default="" />
         <setting label="Jelszó:" type="text" id="password" option="hidden" default="" />
-		<setting type="text" id="userid" visible="false" default="" />
-		<setting type="text" id="signature" visible="false" default="" />
-    	<setting type="text" id="s.timestamp" visible="false" default="0" />
-		<setting type="text" id="myfreemiumcodes" visible="false" default="" />
-		<setting type="text" id="deviceid" visible="false" default="" />
-		<setting type="bool" id="loggedin" visible="false" default="false" />
-		<setting id="logout" type="action" label="[B][COLOR red]Kijelentkezés[/COLOR][/B]" option="close" action="RunPlugin(plugin://plugin.video.rtlmost/?action=logout)" visible="eq(-1,true)" ></setting>
-	</category>
-	<category label="InputStream">
-	    <setting id="drmsettings" type="action" label="InputStream Adaptive beállítások" option="close" action="RunPlugin(plugin://plugin.video.rtlmost/?action=drmSettings)" ></setting>
-	</category>
+        <setting type="text" id="userid" visible="false" default="" />
+        <setting type="text" id="signature" visible="false" default="" />
+        <setting type="text" id="s.timestamp" visible="false" default="0" />
+        <setting type="text" id="myfreemiumcodes" visible="false" default="" />
+        <setting type="text" id="deviceid" visible="false" default="" />
+        <setting type="bool" id="loggedin" visible="false" default="false" />
+        <setting id="logout" type="action" label="[B][COLOR red]Kijelentkezés[/COLOR][/B]" option="close" action="RunPlugin(plugin://plugin.video.rtlmost/?action=logout)" visible="eq(-1,true)"></setting>
+        <setting type="text" id="jwttoken" visible="false" default="" />
+    </category>
+    <category label="InputStream">
+        <setting id="drmsettings" type="action" label="InputStream Adaptive beállítások" option="close" action="RunPlugin(plugin://plugin.video.rtlmost/?action=drmSettings)"></setting>
+    </category>
 </settings>

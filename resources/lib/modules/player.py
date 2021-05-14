@@ -19,7 +19,7 @@
 '''
 
 
-import os,sys,json,xbmc,xbmcaddon,xbmcgui,xbmcplugin,re
+import os, sys, json, xbmc, xbmcaddon, xbmcgui, xbmcplugin, re, base64, time
 from resources.lib.modules import net
 from resources.lib.modules import m3u8_parser
 from resources.lib.modules.utils import py2_encode
@@ -29,7 +29,6 @@ else:
     from urlparse import urlparse
 
 token_url = 'https://drm.6cloud.fr/v1/customers/rtlhu/platforms/m6group_web/services/rtlhu_rtl_most/users/%s/videos/%s/upfront-token'
-getJwt_url = 'https://front-auth.6cloud.fr/v2/platforms/m6group_web/getJwt'
 
 class player:
     def __init__(self):
@@ -55,18 +54,11 @@ class player:
             if len(parsed.scheme) == 0 or len(parsed.netloc) == 0:
                 stream_url = dash_url[0]
 
-            headers = {
-                'x-auth-gigya-uid': self.uid,
-                'x-auth-gigya-signature': xbmcaddon.Addon().getSetting('signature'),
-                'x-auth-gigya-signature-timestamp': xbmcaddon.Addon().getSetting('s.timestamp'),
-                'X-Customer-Name': 'rtlhu',
-                'x-auth-device-id': xbmcaddon.Addon().getSetting('deviceid')
-            }
-            jwtAnswer = json.loads(net.request(getJwt_url, headers=headers))
+
 
             headers = {
                 'x-customer-name': 'rtlhu',
-                'authorization': 'Bearer %s' % jwtAnswer['token'],
+                'authorization': 'Bearer %s' % self.getJwtToken(),
                 'Origin': 'https://www.rtlmost.hu'}
 
             token_source = net.request(token_url % (self.uid, id), headers=headers)
@@ -166,3 +158,25 @@ class player:
         li.setArt({'icon': image, 'thumb': image, 'poster': image, 'tvshow.poster': image})
         li.setInfo(type='Video', infoLabels = meta)
         xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, li)
+
+    def getJwtToken(self):
+        getJwt_url = 'https://front-auth.6cloud.fr/v2/platforms/m6group_web/getJwt'
+        jwtToken = xbmcaddon.Addon().getSetting('jwttoken')
+        if jwtToken != "":
+            decodedToken = base64.urlsafe_b64decode(jwtToken)
+            if sys.version_info[0] == 3:
+                decodedToken = decodedToken.decode("utf-8", "ignore")
+            match = re.search('^(.*)"exp":([^,]*),(.*)', decodedToken)
+            if match:
+                if int(match.group(2))-int(time.time())>0:
+                    return jwtToken
+        headers = {
+            'x-auth-gigya-uid': self.uid,
+            'x-auth-gigya-signature': xbmcaddon.Addon().getSetting('signature'),
+            'x-auth-gigya-signature-timestamp': xbmcaddon.Addon().getSetting('s.timestamp'),
+            'X-Customer-Name': 'rtlhu',
+            'x-auth-device-id': xbmcaddon.Addon().getSetting('deviceid')
+        }
+        jwtAnswer = json.loads(net.request(getJwt_url, headers=headers))
+        xbmcaddon.Addon().setSetting('jwttoken', jwtAnswer['token'])
+        return jwtAnswer['token']
