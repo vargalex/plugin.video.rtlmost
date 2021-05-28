@@ -36,8 +36,14 @@ class player:
 
 
     def play(self, id, streams, image, meta):
+        def sort_by_resolution_pattern(x):
+            patterns = ['_1080p_', '_720p_', '_hd_', '_540p_', '_sd_']
+            pattern = '|'.join('(%s)' %x for x in patterns)
+            match = re.search(pattern, x)
+            return match.lastindex if match != None else len(patterns)+1
+
         #dash_url = [i for i in streams if 'drmnp.ism/Manifest.mpd' in i]
-        dash_url = [i['path'] for i in streams if i['container'] == 'mpd']
+        dash_url = sorted([i['path'] for i in streams if i['container'] == 'mpd'], key=sort_by_resolution_pattern)
         hls_url = sorted([i['path'] for i in streams if i['container'] == 'm3u8'])
         live_url = sorted([i['path'] for i in streams if i['container'] == 'live'])
         li = None
