@@ -169,16 +169,28 @@ class player:
         getJwt_url = 'https://front-auth.6cloud.fr/v2/platforms/m6group_web/getJwt'
         jwtToken = xbmcaddon.Addon().getSetting('jwttoken')
         if jwtToken != "":
-            try:
-                decodedToken = base64.urlsafe_b64decode(jwtToken)
-                if sys.version_info[0] == 3:
-                    decodedToken = decodedToken.decode("utf-8", "ignore")
-                match = re.search('^(.*)"exp":([^,]*),(.*)', decodedToken)
-                if match:
-                    if int(match.group(2))-int(time.time())>0:
-                        return jwtToken
-            except:
-                xbmc.log("RTLMost: Unable to decode jwtToken: %s" % jwtToken, xbmc.LOGERROR)
+            m = re.search('(.*)\.(.*)\.(.*)', jwtToken)
+            if m:
+                errMsg = ""
+                try:
+                    errMsg = "RTLMost: cannot base64 decode the group 2: %s" % m.group(2)
+                    decodedToken=base64.b64decode(m.group(2)+"===")
+                    if sys.version_info[0] == 3:
+                        errMsg = "RTLMost: utf-8 decode error: %s" % decodedToken
+                        decodedToken = decodedToken.decode("utf-8", "ignore")
+                    errMsg = "RTLMost: decodedToken is not a json object: %s" % decodedToken
+                    jsObj = json.loads(decodedToken)
+                    if "exp" in jsObj:
+                        if jsObj["exp"]-int(time.time())>10000:
+                            return jwtToken
+                        else:
+                            xbmc.log("RTLMost: jwtToken expired, request a new one.", xbmc.LOGINFO)
+                    else:
+                        xbmc.log("RTLMost: match group 2 does not contains exp key: %s" % m.group(2), xbmc.LOGERROR)
+                except:
+                    xbmc.log(errMsg, xbmc.LOGERROR)
+            else:
+                xbmc.log("RTLMost: jwtToken not match to (.*)\.(.*)\.(.*). jwtToken: %s" % jwtToken, xbmc.LOGERROR)
         headers = {
             'x-auth-gigya-uid': self.uid,
             'x-auth-gigya-signature': xbmcaddon.Addon().getSetting('signature'),
