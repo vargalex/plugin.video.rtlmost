@@ -1,4 +1,7 @@
-﻿[B]2.2.24[/B]
+﻿[B]2.2.25[/B]
+- jwtToken ismételt lekérése base64 decode sikertelenség esetén
+
+[B]2.2.24[/B]
 - forrás sorbarendezés felbontás szerint (egyedi rendezés)
 
 [B]2.2.23[/B]

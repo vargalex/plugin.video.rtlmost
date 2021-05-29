@@ -169,13 +169,16 @@ class player:
         getJwt_url = 'https://front-auth.6cloud.fr/v2/platforms/m6group_web/getJwt'
         jwtToken = xbmcaddon.Addon().getSetting('jwttoken')
         if jwtToken != "":
-            decodedToken = base64.urlsafe_b64decode(jwtToken)
-            if sys.version_info[0] == 3:
-                decodedToken = decodedToken.decode("utf-8", "ignore")
-            match = re.search('^(.*)"exp":([^,]*),(.*)', decodedToken)
-            if match:
-                if int(match.group(2))-int(time.time())>0:
-                    return jwtToken
+            try:
+                decodedToken = base64.urlsafe_b64decode(jwtToken)
+                if sys.version_info[0] == 3:
+                    decodedToken = decodedToken.decode("utf-8", "ignore")
+                match = re.search('^(.*)"exp":([^,]*),(.*)', decodedToken)
+                if match:
+                    if int(match.group(2))-int(time.time())>0:
+                        return jwtToken
+            except:
+                xbmc.log("RTLMost: Unable to decode jwtToken: %s" % jwtToken, xbmc.LOGERROR)
         headers = {
             'x-auth-gigya-uid': self.uid,
             'x-auth-gigya-signature': xbmcaddon.Addon().getSetting('signature'),
