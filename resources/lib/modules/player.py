@@ -181,7 +181,7 @@ class player:
                     errMsg = "RTLMost: decodedToken is not a json object: %s" % decodedToken
                     jsObj = json.loads(decodedToken)
                     if "exp" in jsObj:
-                        if jsObj["exp"]-int(time.time())>10000:
+                        if jsObj["exp"]-int(time.time())>0:
                             return jwtToken
                         else:
                             xbmc.log("RTLMost: jwtToken expired, request a new one.", xbmc.LOGINFO)
