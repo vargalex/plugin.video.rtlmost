@@ -84,7 +84,6 @@ class player:
                     li.setProperty('inputstreamaddon', 'inputstream.adaptive')   # compatible with Kodi 18 API
                 else:
                     li.setProperty('inputstream', 'inputstream.adaptive')  # compatible with recent builds Kodi 19 API
-                li.setProperty('inputstreamaddon', 'inputstream.adaptive')
                 li.setProperty('inputstream.adaptive.manifest_type', PROTOCOL)
                 li.setProperty('inputstream.adaptive.license_type', DRM)
                 li.setProperty('inputstream.adaptive.license_key', license_key)
