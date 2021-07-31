@@ -1,4 +1,7 @@
-﻿[B]2.2.26[/B]
+﻿[B]2.2.27[/B]
+- Élő adások kinyerésének javítása Leia alatt
+
+[B]2.2.26[/B]
 - jwtToken lejárati idő kinyerésének módosítása
 
 [B]2.2.25[/B]

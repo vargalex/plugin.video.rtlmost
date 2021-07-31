@@ -86,7 +86,7 @@ class navigator:
         query = base_url + livechannels_link
         lives = net.request(query)
         for (i,j) in json.loads(lives, object_pairs_hook=OrderedDict).items():
-            self.addDirectoryItem("[B]"+liveChannels[i] + "[/B] - " + py2_encode(j[0]['title']) + "  [COLOR gold][" + j[0]['diffusion_start_date'][11:-3] + " - " + j[0]['diffusion_end_date'][11:-3] + "][/COLOR]", 'liveChannel&url=%s' % i, '', 'DefaultTVShows.png')
+            self.addDirectoryItem("[B]"+liveChannels[i] + "[/B] - " + py2_encode(j[0]['title']) + "  [COLOR gold][" + py2_encode(j[0]['diffusion_start_date'])[11:-3] + " - " + py2_encode(j[0]['diffusion_end_date'])[11:-3] + "][/COLOR]", 'liveChannel&url=%s' % i, '', 'DefaultTVShows.png')
         self.endDirectory()
 
     def liveChannel(self, channel):
