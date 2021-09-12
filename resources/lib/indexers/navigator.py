@@ -159,6 +159,7 @@ class navigator:
 
             @classmethod
             def find_first_common_pattern(cls, episodes):
+                xbmcgui.Dialog().ok("a", "itt")
                 for pattern in cls.PATTERNS_IN_PRIORITY_ORDER:
                     if all([ pattern.match(ep.get('title', '')) is not None for ep in episodes ]):
                         return pattern
@@ -213,7 +214,7 @@ class navigator:
             # the show has multiple seasons or subcategories, list these, and let the user to choose one
             for item in subcats:
                 str(item['id'])
-                self.addDirectoryItem(py2_encode(item['title']), 'episodes&url=%s&fanart=%s&subcats=%s' % (id, fanart, json.dumps([item])), '', 'DefaultFolder.png', Fanart=fanart)
+                self.addDirectoryItem(py2_encode(item['title']), 'episodes&url=%s&fanart=%s&subcats=%s' % (id, fanart, quote_plus(json.dumps([item]))), '', 'DefaultFolder.png', Fanart=fanart)
             self.endDirectory(type='seasons')
             return
 
