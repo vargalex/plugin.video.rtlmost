@@ -159,7 +159,6 @@ class navigator:
 
             @classmethod
             def find_first_common_pattern(cls, episodes):
-                xbmcgui.Dialog().ok("a", "itt")
                 for pattern in cls.PATTERNS_IN_PRIORITY_ORDER:
                     if all([ pattern.match(ep.get('title', '')) is not None for ep in episodes ]):
                         return pattern

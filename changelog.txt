@@ -1,4 +1,7 @@
-﻿[B]2.2.28[/B]
+﻿[B]2.2.29[/B]
+- Felesleges dialog eltávolítása
+
+[B]2.2.28[/B]
 - Hibajavítás: epizód kategóra tartalmazhat pipe-ot (|)
 
 [B]2.2.27[/B]
