@@ -1,4 +1,7 @@
-﻿[B]2.2.29[/B]
+﻿[B]2.2.30[/B]
+- Lekérdezés limitek növelése
+
+[B]2.2.29[/B]
 - Felesleges dialog eltávolítása
 
 [B]2.2.28[/B]
