@@ -1,4 +1,7 @@
-﻿[B]2.2.30[/B]
+﻿[B]2.2.31[/B]
+- Limit beállítása a maximális 999-re
+
+[B]2.2.30[/B]
 - Lekérdezés limitek növelése
 
 [B]2.2.29[/B]

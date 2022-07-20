@@ -38,9 +38,9 @@ addonFanart = addon().getAddonInfo('fanart')
 
 base_url = 'https://pc.middleware.6play.fr/6play/v2/platforms/m6group_web/services/rtlhu_rtl_most'
 img_link = 'https://images.6play.fr/v2/images/%s/raw'
-cat_link = '/folders?limit=200&offset=0'
-prog_link = '/folders/%s/programs?limit=200&offset=0&csa=5&with=parentcontext'
-episode_link = '/programs/%s/videos?csa=5&with=clips,freemiumpacks&type=vi,vc,playlist&limit=200&offset=0&subcat=%s&sort=subcat'
+cat_link = '/folders?limit=999&offset=0'
+prog_link = '/folders/%s/programs?limit=999&offset=0&csa=5&with=parentcontext'
+episode_link = '/programs/%s/videos?csa=5&with=clips,freemiumpacks&type=vi,vc,playlist&limit=999&offset=0&subcat=%s&sort=subcat'
 episode_subcat_link = '/programs/%s?with=links,subcats,rights'
 video_link = '/videos/%s?csa=5&with=clips,freemiumpacks,program_images,service_display_images'
 livechannels_link = '/live?channel=rtlhu_rtl_klub,rtlhu_rtl_ii,rtlhu_rtl_gold,rtlhu_cool,rtlhu_rtl_plus,rtlhu_film_plus,rtlhu_sorozat_plus,rtlhu_muzsika_tv&with=freemiumpacks,service_display_images,nextdiffusion,extra_data'
