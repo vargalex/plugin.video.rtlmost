@@ -22,6 +22,8 @@
 import os,sys,re,xbmc,xbmcgui,xbmcplugin,xbmcaddon,urllib,json,time,locale
 from resources.lib.modules import net
 from  collections import OrderedDict
+from resources.lib.modules import player
+
 if sys.version_info[0] == 3:
     import urllib.parse as urlparse
     from urllib.parse import quote_plus
@@ -43,11 +45,11 @@ prog_link = '/folders/%s/programs?limit=999&offset=0&csa=5&with=parentcontext'
 episode_link = '/programs/%s/videos?csa=5&with=clips,freemiumpacks&type=vi,vc,playlist&limit=999&offset=0&subcat=%s&sort=subcat'
 episode_subcat_link = '/programs/%s?with=links,subcats,rights'
 video_link = '/videos/%s?csa=5&with=clips,freemiumpacks,program_images,service_display_images'
-livechannels_link = '/live?channel=rtlhu_rtl_klub,rtlhu_rtl_ii,rtlhu_rtl_gold,rtlhu_cool,rtlhu_rtl_plus,rtlhu_film_plus,rtlhu_sorozat_plus,rtlhu_muzsika_tv&with=freemiumpacks,service_display_images,nextdiffusion,extra_data'
-live_stream_link = '/live?channel=%s&with=freemiumpacks,service_display_images,nextdiffusion,extra_data'
 freemiumsubscriptions_url = 'https://6play-users.6play.fr/v2/platforms/m6group_web/users/%s/freemiumsubscriptions'
 freemium_subscription_needed_errormsg = 'A hozzáféréshez RTL Most+ előfizetés szükséges.\nRészletek: https://www.rtlmost.hu/premium'
 deviceID_url = 'https://e.m6web.fr/info?customer=rtlhu'
+profile_url = 'https://6play-users.6play.fr/v2/platforms/m6group_web/users/%s/profiles'
+video_url = 'https://layout.6cloud.fr/front/v1/rtlhu/m6group_web/main/token-web-3/video/%s/layout?nbPages=2'
 
 class navigator:
     def __init__(self):
@@ -74,40 +76,10 @@ class navigator:
         query = base_url + cat_link
         categories = net.request(query)
 
-        self.addDirectoryItem('Élő adás', 'liveChannels', '', 'DefaultTVShows.png')
         for i in json.loads(categories):
             self.addDirectoryItem(py2_encode(i['name']), 'programs&url=%s' % str(i['id']), '', 'DefaultTVShows.png')
 
         self.endDirectory()
-
-
-    def liveChannels(self):
-        liveChannels = {'rtlhu_rtl_klub': 'RTL Klub', 'rtlhu_rtl_ii': 'RTL II', 'rtlhu_cool': 'Cool TV', 'rtlhu_rtl_gold': 'RTL Gold', 'rtlhu_rtl_plus': 'RTL+', 'rtlhu_film_plus': 'Film+', 'rtlhu_sorozat_plus': 'Sorozat+', 'rtlhu_muzsika_tv': 'Muzsika TV'}
-        query = base_url + livechannels_link
-        lives = net.request(query)
-        for (i,j) in json.loads(lives, object_pairs_hook=OrderedDict).items():
-            self.addDirectoryItem("[B]"+liveChannels[i] + "[/B] - " + py2_encode(j[0]['title']) + "  [COLOR gold][" + py2_encode(j[0]['diffusion_start_date'])[11:-3] + " - " + py2_encode(j[0]['diffusion_end_date'])[11:-3] + "][/COLOR]", 'liveChannel&url=%s' % i, '', 'DefaultTVShows.png')
-        self.endDirectory()
-
-    def liveChannel(self, channel):
-        headers = {
-            'x-6play-freemium': '1',
-            'x-auth-gigya-uid': xbmcaddon.Addon().getSetting('userid'),
-            'x-auth-gigya-signature': xbmcaddon.Addon().getSetting('signature'),
-            'x-auth-gigya-signature-timestamp': xbmcaddon.Addon().getSetting('s.timestamp'),
-            'Origin': 'https://www.rtlmost.hu'}
-        query = base_url + live_stream_link
-        live = net.request(query % channel, headers=headers)
-        live = json.loads(live)
-        assets = live[channel][0]['live']['assets']
-        if assets != []:
-            streams = [{'container': 'live', 'path': i['full_physical_path']} for i in assets]
-            meta = {'title': live[channel][0]['title']}
-            from resources.lib.modules import player
-            player.player().play(channel, streams, None, json.dumps(meta))
-        else:
-            xbmcgui.Dialog().ok(u'Lej\u00E1tsz\u00E1s sikertelen.', freemium_subscription_needed_errormsg)
-            xbmcplugin.setResolvedUrl(int(sys.argv[1]), False, xbmcgui.ListItem())
 
     def programs(self, id):
         query = base_url + prog_link
@@ -264,25 +236,23 @@ class navigator:
 
 
     def get_video(self, id, meta, image):
-        query = base_url + video_link
-        clip = net.request(query % id, headers=self.addAuthenticationHeaders())
+        clip = net.request(video_url % id, headers={'authorization': 'Bearer %s' % player.player().getJwtToken()})
         clip = json.loads(clip)
-        assets = clip['clips'][0].get('assets')
+        try:
+            assets = clip['blocks'][0]['content']['items'][0]['itemContent']['video']['assets']
+        except:
+            assets = None
         if assets is not None and assets != []:
-            streams = [{'container': i['video_container'], 'path': i['full_physical_path']} for i in assets]
-            from resources.lib.modules import player
+            streams = [i['path'] for i in assets]
             player.player().play(id, streams, image, meta)
         else:
             xbmcgui.Dialog().ok(u'Lej\u00E1tsz\u00E1s sikertelen.', freemium_subscription_needed_errormsg)
             xbmcplugin.setResolvedUrl(int(sys.argv[1]), False, xbmcgui.ListItem())
 
 
-    def myFreemiumCodes(self):
-        my_uid = xbmcaddon.Addon().getSetting('userid')
-        rsp = net.request(freemiumsubscriptions_url % my_uid, headers=self.addAuthenticationHeaders())
-
+    def myFreemiumCodes(self, packSubscriptions):
         my_freemium_product_codes = dict()
-        for subscription in json.loads(rsp):
+        for subscription in packSubscriptions:
             for product in subscription.get("freemium_products", []):
                 code = product["code"]
                 id = product["id"]
@@ -291,7 +261,6 @@ class navigator:
                     # the same code under different ids (not very likely, but let's prepare)
                     my_freemium_product_codes[code] = list()
                 my_freemium_product_codes[code].append(id)
-
         return my_freemium_product_codes
 
 
@@ -313,17 +282,17 @@ class navigator:
         if update == False:
             return
 
-        login_url = 'https://%s/accounts.login?loginID=%s&password=%s&targetEnv=mobile&format=jsonp&apiKey=%s&callback=jsonp'
+        login_url = 'https://accounts.%s/accounts.login?loginID=%s&password=%s&targetEnv=mobile&format=jsonp&apiKey=%s&callback=jsonp&include=data'
         most_baseUrl = 'https://www.rtlmost.hu'
 
         most_source = net.request(most_baseUrl)
-        client_js = re.search('''<script\s*type=['"]module['"]\s*src=['"](\/?client-.+?)['"]''', most_source).group(1)
-        api_src = net.request(urlparse.urljoin(most_baseUrl, client_js))
+        main_js = re.search('''<script async data-chunk="main" src=['"](\/main-.+?)['"]''', most_source).group(1)
+        api_src = net.request(urlparse.urljoin(most_baseUrl, main_js))
         api_src = re.findall('gigya\s*:\s*(\{[^\}]+\})', api_src)
         api_src = [i for i in api_src if 'login.rtlmost.hu' in i][0]
         api_src = json.loads(re.sub('([{,:])(\w+)([},:])','\\1\"\\2\"\\3', api_src))
 
-        r = net.request(login_url % (api_src['domain'], self.username, quote_plus(self.password), api_src['key']))
+        r = net.request(login_url % (api_src['cdn'], self.username, quote_plus(self.password), api_src['key']))
         r = re.search('\(([^\)]+)', r).group(1)
         jsonparse = json.loads(r)
 
@@ -337,11 +306,18 @@ class navigator:
         xbmcaddon.Addon().setSetting('signature', jsonparse['UIDSignature'])
         xbmcaddon.Addon().setSetting('s.timestamp', jsonparse['signatureTimestamp'])
         xbmcaddon.Addon().setSetting('loggedin', 'true')
-        xbmcaddon.Addon().setSetting('myfreemiumcodes', json.dumps(self.myFreemiumCodes()))
+        xbmcaddon.Addon().setSetting('myfreemiumcodes', json.dumps(self.myFreemiumCodes(jsonparse['data']['packSubscriptions'])))
 
         r = net.request(deviceID_url)
         jsonparse = json.loads(r)
         xbmcaddon.Addon().setSetting('deviceid', jsonparse['device_id'])
+        jwtToken = player.player().getJwtToken()
+        r = net.request(profile_url % xbmcaddon.Addon().getSetting('userid'), headers={'authorization': 'Bearer %s' % jwtToken})
+        js = json.loads(r)
+        xbmcaddon.Addon().setSetting('profileid', js[0]['uid'])
+        xbmcaddon.Addon().setSetting('jwttoken', '')
+        player.player().getJwtToken()
+
 
 
     def Logout(self):
@@ -354,6 +330,8 @@ class navigator:
             xbmcaddon.Addon().setSetting('myfreemiumcodes', '')
             xbmcaddon.Addon().setSetting('email', '')
             xbmcaddon.Addon().setSetting('password', '')
+            xbmcaddon.Addon().setSetting('deviceid', '')
+            xbmcaddon.Addon().setSetting('jwttoken', '')
             xbmcaddon.Addon().setSetting('deviceid', '')
             xbmc.executebuiltin("XBMC.Container.Update(path,replace)")
             xbmc.executebuiltin("XBMC.ActivateWindow(Home)")

@@ -53,12 +53,6 @@ elif action == 'episodes':
 elif action == 'play':
     navigator().get_video(url, meta, image)
 
-elif action == 'liveChannels':
-    navigator().liveChannels()
-
-elif action == 'liveChannel':
-    navigator().liveChannel(url)
-
 elif action == 'drmSettings':
     import xbmcaddon
     xbmcaddon.Addon(id='inputstream.adaptive').openSettings()

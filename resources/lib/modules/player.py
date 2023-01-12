@@ -43,9 +43,8 @@ class player:
             return match.lastindex if match != None else len(patterns)+1
 
         #dash_url = [i for i in streams if 'drmnp.ism/Manifest.mpd' in i]
-        dash_url = sorted([i['path'] for i in streams if i['container'] == 'mpd'], key=sort_by_resolution_pattern)
-        hls_url = sorted([i['path'] for i in streams if i['container'] == 'm3u8'])
-        live_url = sorted([i['path'] for i in streams if i['container'] == 'live'])
+        dash_url = sorted([i for i in streams if 'mpd' in i], key=sort_by_resolution_pattern)
+        hls_url = sorted([i for i in streams if 'm3u8' in i])
         li = None
         if dash_url != []:
             # Inputstream and DRM
@@ -117,43 +116,6 @@ class player:
             stream_url = root + '/' + source
             li = xbmcgui.ListItem(path=stream_url)
 
-        elif live_url != []:
-            live_url.sort(reverse=True)
-            sources = []
-            for i in live_url:
-                stream_url = i
-                try:
-                    manifest = net.request(stream_url, timeout=30)
-                    sources_temp = m3u8_parser.parse(manifest)
-                    root = os.path.dirname(stream_url)
-                    for j in sources_temp:
-                        j['root'] = root
-                    sources.extend(sources_temp)
-                    if len(sources)>0:
-                        break
-                except:
-                        pass
-            sources = sorted(sources, key=lambda x: x['resolution'], reverse=False)
-            auto_pick = xbmcaddon.Addon().getSetting('hls_quality') == '0'
-
-            if len(sources) > 0:
-                if len(sources) == 1 or auto_pick == True:
-                    source = sources[0]['uri']
-                else:
-                    result = xbmcgui.Dialog().select(u'Min\u0151s\u00E9g', [str(source['resolution']) if 'resolution' in source else 'Unknown' for source in sources])
-                    if result == -1:
-                        return
-                    else:
-                        source = sources[result]['uri']
-                stream_url = root + '/' + source
-            else:
-                stream_url = live_url[0]
-            li = xbmcgui.ListItem(path=stream_url)
-            meta = json.loads(meta)
-            li.setInfo(type='Video', infoLabels = meta)
-            xbmc.Player().play(stream_url, li)
-            return
-
         if li is None:
             xbmcgui.Dialog().notification(u'Lej\u00E1tsz\u00E1s sikertelen. DRM v\u00E9dett m\u0171sor.', 'RTL Most', time=8000)
             xbmcplugin.setResolvedUrl(int(sys.argv[1]), False, xbmcgui.ListItem())
@@ -197,6 +159,8 @@ class player:
             'X-Customer-Name': 'rtlhu',
             'x-auth-device-id': xbmcaddon.Addon().getSetting('deviceid')
         }
+        if xbmcaddon.Addon().getSetting('profileid') != "":
+            headers['x-auth-profile-id'] = xbmcaddon.Addon().getSetting('profileid')
         jwtAnswer = json.loads(net.request(getJwt_url, headers=headers))
         xbmcaddon.Addon().setSetting('jwttoken', jwtAnswer['token'])
         return jwtAnswer['token']

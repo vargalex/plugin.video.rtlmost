@@ -1,4 +1,8 @@
-﻿[B]2.2.31[/B]
+﻿[B]2.2.32~alpha[/B]
+- Forrás változás követése
+- Előfizetésnek megfelelő tartalom lejátszása
+
+[B]2.2.31[/B]
 - Limit beállítása a maximális 999-re
 
 [B]2.2.30[/B]
