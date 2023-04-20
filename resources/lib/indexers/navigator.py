@@ -288,8 +288,7 @@ class navigator:
         most_source = net.request(most_baseUrl)
         main_js = re.search('''<script async data-chunk="main" src=['"](\/main-.+?)['"]''', most_source).group(1)
         api_src = net.request(urlparse.urljoin(most_baseUrl, main_js))
-        api_src = re.findall('gigya\s*:\s*(\{[^\}]+\})', api_src)
-        api_src = [i for i in api_src if 'login.rtlmost.hu' in i][0]
+        api_src = re.findall(r'(?:=)([^}]+login.rtlmost.hu[^}]+})', api_src)[0]
         api_src = json.loads(re.sub('([{,:])(\w+)([},:])','\\1\"\\2\"\\3', api_src))
 
         r = net.request(login_url % (api_src['cdn'], self.username, quote_plus(self.password), api_src['key']))

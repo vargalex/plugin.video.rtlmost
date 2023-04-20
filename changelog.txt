@@ -1,4 +1,7 @@
-﻿[B]2.2.32~alpha[/B]
+﻿[B]2.2.33[/B]
+- Forrás változás követése (bejelentkezés)
+
+[B]2.2.32~alpha[/B]
 - Forrás változás követése
 - Előfizetésnek megfelelő tartalom lejátszása
 
